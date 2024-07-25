@@ -38,6 +38,7 @@ class ViewClass:
         # Create chat area
         self.chatArea = scrolledtext.ScrolledText(self.panel1, bg="#212121", fg="white", wrap=tk.WORD)
         self.chatArea.grid(row=0, column=0, columnspan=5, sticky="nsew", pady=(0, 10))
+        self.chatArea.insert(tk.END, "Type [/help] for the list of possible commands\n\n")
         self.chatArea.config(state=tk.DISABLED)
         
         # Configure grid weights
@@ -51,12 +52,23 @@ class ViewClass:
         # Bind Enter key to send message
         self.userInput.bind("<Return>", lambda event: self.send_message())
     
-    def send_message(self):
-        input_text = self.userInput.get().strip()
+    def send_message(self, input_text):
+        #print("send message is called")
         if input_text:
             self.chatArea.config(state=tk.NORMAL)
             self.chatArea.insert(tk.END, f"You: \n{input_text} \n\n")
             self.chatArea.see(tk.END)
             self.chatArea.config(state=tk.DISABLED)
             self.userInput.delete(0, tk.END)
+
+    def display_message(self, message):
+        self.chatArea.config(state=tk.NORMAL)
+        self.chatArea.insert(tk.END,"Response:\n" + message + "\n\n")
+        self.chatArea.see(tk.END)
+        self.chatArea.config(state=tk.DISABLED)
+
+    def get_input(self):
+        input_text = self.userInput.get().strip()
+        self.userInput.delete(0, tk.END)
+        return input_text
 

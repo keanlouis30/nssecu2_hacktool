@@ -20,15 +20,98 @@ class ControllerClass:
     def __init__(self, model, view):
         self.model = model
         self.view = view
-        
-        self.view.sendButton.config(command=self.update_message)
-    
-    def update_message(self):
-        input_text = self.view.userInput.get().strip()
-        if input_text:
-            self.view.chatArea.config(state=tk.NORMAL)
-            self.view.chatArea.insert(tk.END, f"You: \n{input_text} \n\n")
-            self.view.chatArea.see(tk.END)
-            self.view.chatArea.config(state=tk.DISABLED)
-            self.view.userInput.delete(0, tk.END)
+        self.username_acquired = False
+        self.password_acquired = False
+        self.ig_logged_in = False
+        self.target_user_acquired = False
+        self.scrape_done = False
+        self.username = ""
+        self.password = ""
+        # Bind the button click and Enter key event to the process_input method
+        self.view.sendButton.config(command=self.process_input)
+        self.view.userInput.bind("<Return>", lambda event: self.process_input())
 
+        self.commands = {
+            "[/help]": "List all commands",
+            "[/loginUser (username)]": "Input username for logging in",
+            "[/loginPass (password)]": "Input password for logging in",
+            "[/igLogin]": "Login to Instagram",
+            "[/targetUsername (username)]": "Provide the target's Instagram username",
+            "[/scrape]": "Get the information of the target",
+            "[/generateReport]": "Generate a PDF of the report",
+            "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
+            # Add other commands here
+        }
+        
+    def process_input(self):
+        input_text = self.view.get_input()
+        if input_text:
+            self.view.send_message(input_text)
+            if input_text.startswith('/'):
+                self.handle_command(input_text)
+            else:
+                self.view.display_message("Error processing command\n\nType [/help] for the list of possible commands\n\n")
+
+    def handle_command(self, command):
+        if command == "/help":
+            help_message = "Available commands:\n"
+            for cmd, desc in self.commands.items():
+                help_message += f"{cmd}: {desc}\n"
+            self.view.display_message(help_message)
+        elif command.startswith("/loginUser"):
+            split_string = command.split()
+            if len(split_string) > 1:
+                self.username = split_string[1]
+                self.username_acquired = True
+                self.view.display_message("Username acquired")
+            else:
+                self.view.display_message("Username not provided.")
+        elif command.startswith("/loginPass"):
+            if self.username_acquired:
+                split_string = command.split()
+                if len(split_string) > 1:
+                    self.password = split_string[1]
+                    self.password_acquired = True
+                    self.view.display_message("Password acquired")
+                else:
+                    self.view.display_message("Password not provided.")
+            else:
+                self.view.display_message("Enter username first")
+        elif command == "/igLogin":
+            if self.username_acquired and self.password_acquired:
+                self.view.display_message("Login")
+                self.ig_logged_in = True
+            else:
+                self.view.display_message("Error! Username or Password is not provided")
+        elif command.startswith("/targetUsername"):
+            if self.ig_logged_in:
+                split_string = command.split()
+                username = split_string[1]
+                self.view.display_message(F"The target username is: {username}")
+                self.target_user_acquired = True
+            else:
+                self.view.display_message("Error! User is not yet logged in")
+        elif command == "/scrape":
+            if self.target_user_acquired:
+                self.view.display_message("Finding the information of this person")
+                self.scrape_done = True
+            else:
+                self.view.display_message("Target username not provided")
+        elif command == "/generateReport":
+            if self.scrape_done:
+                self.view.display_message("Generating file report via PDF")
+            else:
+                self.view.display_message("Cannot generate report due to lacking information")
+        elif command == "/igLogout":
+            if self.ig_logged_in:
+                self.view.display_message("Logging out and removing username and password")
+                self.username = ""
+                self.password = ""
+                self.ig_logged_in = False
+                self.username_acquired = False
+                self.password_acquired = False
+                print("The credentials are: " + self.username + " " + self.password + "test")
+            else:
+                self.view.display_message("Error! User is not yet logged in")
+        else:
+            self.view.display_message("Unknown command. Type /help for a list of commands.")

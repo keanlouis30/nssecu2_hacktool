@@ -20,8 +20,9 @@ from View import ViewClass
 from Controller import ControllerClass
 
 if __name__ == "__main__":
+    edgedriver_path = "edgedriver_win64/msedgedriver.exe"
     root = tk.Tk()
-    model = ModelClass()
+    model = ModelClass(edgedriver_path)
     view = ViewClass(root)
     controller = ControllerClass(model, view)
     root.mainloop()
