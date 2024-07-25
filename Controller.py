@@ -12,8 +12,7 @@
 # on 
 # (deadline)
 
-
-#data handling and output processing
+# data handling and output processing
 import tkinter as tk
 
 class ControllerClass:
@@ -22,12 +21,17 @@ class ControllerClass:
         self.view = view
         self.username_acquired = False
         self.password_acquired = False
+        self.tw_user_acquired = False
+        self.tw_pass_acquired = False
         self.ig_logged_in = False
         self.target_user_acquired = False
         self.scrape_done = False
         self.username = ""
         self.password = ""
+        self.tw_username = ""
+        self.tw_password = ""
         self.target_username = ""
+        
         # Bind the button click and Enter key event to the process_input method
         self.view.sendButton.config(command=self.process_input)
         self.view.userInput.bind("<Return>", lambda event: self.process_input())
@@ -36,13 +40,15 @@ class ControllerClass:
             "[/help]": "List all commands",
             "[/loginUser (username)]": "Input username for logging in",
             "[/loginPass (password)]": "Input password for logging in",
+            "[/twLogin (twitter_username)]": "Input Twitter username for login",
+            "[/twPass (twitter_password)]": "Input Twitter password for login",
             "[/igLogin]": "Login to Instagram",
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
-            "[/searchTwitter]":"Using the target username, it will search for it on twitter.",
-            "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
-            
+            "[/searchTwitter]": "Using the target username, it will search for it on Twitter.",
+            "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session",
+            "[/twLogout]": "Log out of Twitter and remove your Twitter credentials from this session"
             # Add other commands here
         }
         
@@ -80,20 +86,39 @@ class ControllerClass:
                     self.view.display_message("Password not provided.")
             else:
                 self.view.display_message("Enter username first")
+        elif command.startswith("/twLogin"):
+            split_string = command.split()
+            if len(split_string) > 1:
+                self.tw_username = split_string[1]
+                self.tw_user_acquired = True
+                self.view.display_message("Twitter username acquired")
+            else:
+                self.view.display_message("Twitter username not provided.")
+        elif command.startswith("/twPass"):
+            if self.tw_user_acquired:
+                split_string = command.split()
+                if len(split_string) > 1:
+                    self.tw_password = split_string[1]
+                    self.tw_pass_acquired = True
+                    self.view.display_message("Twitter password acquired")
+                else:
+                    self.view.display_message("Twitter password not provided.")
+            else:
+                self.view.display_message("Enter Twitter username first")
         elif command == "/igLogin":
             if self.username_acquired and self.password_acquired:
                 if self.model.login_instagram(self.username, self.password):
                     self.view.display_message("Login success!")
                     self.ig_logged_in = True
                 else:
-                    self.view.display_message("Error loggin in")
+                    self.view.display_message("Error logging in")
             else:
                 self.view.display_message("Error! Username or Password is not provided")
         elif command.startswith("/targetUsername"):
             if self.ig_logged_in:
                 split_string = command.split()
                 self.target_username = split_string[1]
-                self.view.display_message(F"The target username is: {self.target_username}")
+                self.view.display_message(f"The target username is: {self.target_username}")
                 self.target_user_acquired = True
             else:
                 self.view.display_message("Error! User is not yet logged in")
@@ -117,27 +142,38 @@ class ControllerClass:
         elif command == "/igLogout":
             if self.ig_logged_in:
                 self.view.display_message("Logging out and removing username and password")
-                if self.model.logout():  
+                if self.model.logout():
                     self.username = ""
                     self.password = ""
                     self.ig_logged_in = False
                     self.username_acquired = False
                     self.password_acquired = False
-                    #print("The credentials are: " + self.username + " " + self.password + "test")
                     self.view.display_message("Logout success!")
                 else:
-                    self.view.display_message("The web logout is unsucessful, please try again")
+                    self.view.display_message("The web logout is unsuccessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
-        elif command == "/searchTwitter":
-            if self.target_user_acquired:
-             self.view.display_message(f"Searching Twitter for: {self.target_username}")
-             if self.model.search_twitter(self.target_username):
-               self.view.display_message("Twitter search completed successfully")
+        elif command == "/twLogout":
+            if self.tw_user_acquired and self.tw_pass_acquired:
+                self.view.display_message("Logging out of Twitter and removing Twitter credentials")
+                if self.model.logout_twitter():
+                    self.tw_username = ""
+                    self.tw_password = ""
+                    self.tw_user_acquired = False
+                    self.tw_pass_acquired = False
+                    self.view.display_message("Twitter logout success!")
+                else:
+                    self.view.display_message("The Twitter logout is unsuccessful, please try again")
             else:
-              self.view.display_message("Error searching Twitter")
+                self.view.display_message("Twitter credentials not provided")
+        elif command == "/searchTwitter":
+            if self.target_user_acquired and self.tw_user_acquired and self.tw_pass_acquired:
+                self.view.display_message(f"Searching Twitter for: {self.target_username}")
+                if self.model.search_twitter(self.target_username, self.tw_username, self.tw_password):
+                    self.view.display_message("Twitter search completed successfully")
+                else:
+                    self.view.display_message("Error searching Twitter")
+            else:
+                self.view.display_message("Target username or Twitter credentials not provided")
         else:
-            self.view.display_message("Target username not provided")
-        
-
-     
+            self.view.display_message("Invalid command. Type [/help] for the list of possible commands")

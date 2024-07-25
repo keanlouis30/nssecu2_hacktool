@@ -166,21 +166,22 @@ class ModelClass:
     def search_twitter(self, username):
         try:
             self.driver.get(f'https://twitter.com/{username}')
-            time.sleep(3)  
+            time.sleep(5)  
 
             
             if "This account doesn’t exist" in self.driver.page_source:
                 print("Account does not exist.")
                 return False
-
             
+            close = self.driver.find_element(By.XPATH, '//div[text()="Not now"]')
+            close.click()
+            print("Clicked 'Not now' button.")
+            time.sleep(3)
             screenshot_directory = 'Screenshots'
             os.makedirs(screenshot_directory, exist_ok=True)
             self.screenshot_file = os.path.join(screenshot_directory, f'{username}_twitter_profile.png')
             self.driver.get_screenshot_as_file(self.screenshot_file)
             print(f"Screenshot saved as {self.screenshot_file}")
-
-           
 
             return True
         except Exception as e:
