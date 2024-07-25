@@ -40,7 +40,9 @@ class ControllerClass:
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
+            "[/searchTwitter]":"Using the target username, it will search for it on twitter.",
             "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
+            
             # Add other commands here
         }
         
@@ -127,5 +129,15 @@ class ControllerClass:
                     self.view.display_message("The web logout is unsucessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
+        elif command == "/searchTwitter":
+            if self.target_user_acquired:
+             self.view.display_message(f"Searching Twitter for: {self.target_username}")
+             if self.model.search_twitter(self.target_username):
+               self.view.display_message("Twitter search completed successfully")
+            else:
+              self.view.display_message("Error searching Twitter")
         else:
-            self.view.display_message("Unknown command. Type /help for a list of commands.")
+            self.view.display_message("Target username not provided")
+        
+
+     

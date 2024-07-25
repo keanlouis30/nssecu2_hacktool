@@ -163,5 +163,29 @@ class ModelClass:
         except Exception as e:
             print(f"'Not now' button not found or already handled: {e}")
 
+    def search_twitter(self, username):
+        try:
+            self.driver.get(f'https://twitter.com/{username}')
+            time.sleep(5)  # Allow some time for the page to load
+
+            # Check if the page loaded successfully
+            if "This account doesn’t exist" in self.driver.page_source:
+                print("Account does not exist.")
+                return False
+
+            # Optionally, take a screenshot of the profile
+            screenshot_directory = 'Screenshots'
+            os.makedirs(screenshot_directory, exist_ok=True)
+            self.screenshot_file = os.path.join(screenshot_directory, f'{username}_twitter_profile.png')
+            self.driver.get_screenshot_as_file(self.screenshot_file)
+            print(f"Screenshot saved as {self.screenshot_file}")
+
+            # Extract additional profile details if needed
+
+            return True
+        except Exception as e:
+            print(f"Error searching Twitter: {e}")
+            return False
+        
     def close(self):
         self.driver.quit()
