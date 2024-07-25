@@ -44,9 +44,15 @@ class ModelClass:
             'followers': self.driver.find_element(By.XPATH, '//li[2]/a/span').get_attribute('title'),
             'following': self.driver.find_element(By.XPATH, '//li[3]/a/span').text,
             }
-            return True
+
+            screenshot_directory = '/Screenshots/'
+            screenshot_filename = f'{screenshot_directory}{username}_profile.png'
+            self.driver.get_screenshot_as_file(screenshot_filename)
+            print(f"Screenshot saved as {screenshot_filename}")
+
+            return profile_data
         except:
-            return False
+            return None
         
 
     def search_facebook_profile(self, name):
@@ -74,7 +80,7 @@ class ModelClass:
         }
         return profile_data
 
-    def save_to_pdf(self, profile_data, output_file):
+    def save_to_pdf(self, profile_data, screenshot_file, output_file):
         data = pd.DataFrame([profile_data])
 
         class PDF(FPDF):
@@ -92,6 +98,9 @@ class ModelClass:
                 self.multi_cell(0, 10, body)
                 self.ln()
 
+            def add_image(self, image_path):
+                self.image(image_path, x=10, y=None, w=180) 
+
         pdf = PDF()
         pdf.add_page()
 
@@ -99,7 +108,10 @@ class ModelClass:
             pdf.chapter_title(f"Profile: {row['username']}")
             pdf.chapter_body(f"Name: {row['name']}\nBio: {row['bio']}\nPosts: {row['posts']}\nFollowers: {row['followers']}\nFollowing: {row['following']}\n")
 
+        pdf.add_image(screenshot_file)
+
         pdf.output(output_file)
+
         
     def logout(self, platform='instagram'):
         if platform == 'instagram':
