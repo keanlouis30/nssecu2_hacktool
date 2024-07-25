@@ -11,3 +11,17 @@
 # ASCAN, ADRIAN GIOVANNI
 # on 
 # (deadline)
+
+
+#Main program
+import tkinter as tk
+from Model import ModelClass
+from View import ViewClass
+from Controller import ControllerClass
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    model = ModelClass()
+    view = ViewClass(root)
+    controller = ControllerClass(model, view)
+    root.mainloop()

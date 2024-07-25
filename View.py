@@ -12,10 +12,13 @@
 # on 
 # (deadline)
 
+
+#GUI
+
 import tkinter as tk
 from tkinter import scrolledtext
 
-class GUI:
+class ViewClass:
     def __init__(self, root):
         self.root = root
         self.root.title("Social Media Scraper")
@@ -57,7 +60,3 @@ class GUI:
             self.chatArea.config(state=tk.DISABLED)
             self.userInput.delete(0, tk.END)
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    gui = GUI(root)
-    root.mainloop()

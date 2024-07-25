@@ -7,4 +7,5 @@ To verify installation of said libaries:
     - pip show selenium beautifulsoup4 pandas
 
 GUI User Guide:
+    - Run 'Main.py'
 
