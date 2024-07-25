@@ -27,8 +27,11 @@ class ModelClass:
         self.driver = webdriver.Edge(service=service)
         self.profile_data = {}
         self.screenshot_file = None
+        self.screenshot_file_followers = None
         self.output_file = None
         self.username = ""
+        self.followers = []
+        self.followings = []
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
@@ -99,13 +102,43 @@ class ModelClass:
             self.driver.get_screenshot_as_file(self.screenshot_file)
             print(f"Screenshot saved as {self.screenshot_file}")
 
+            # Click the followers link
+            try:
+                followers_link = self.driver.find_element(By.XPATH, f'//a[@href="/{username}/followers/"]')
+                followers_link.click()
+                time.sleep(3)  # Allow time for the followers list to load
+            except Exception as e:
+                print(f"Error clicking followers link: {e}")
+
+            # Scroll to load all followers
+            try:
+                followers_list = self.driver.find_element(By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]')
+                last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+
+                while True:
+                    self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", followers_list)
+                    time.sleep(2)
+                    new_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+                    if new_height == last_height:
+                        break
+                    last_height = new_height
+
+                followers_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
+                self.followers = [elem.text for elem in followers_elems]
+            except Exception as e:
+                print(f"Error scraping followers: {e}")
+
+            self.screenshot_file_followers = os.path.join(screenshot_directory, f'{username}_profile_followers.png')
+            self.driver.get_screenshot_as_file(self.screenshot_file_followers)
+            print(f"Screenshot saved as {self.screenshot_file_followers}")
+
             self.output_file = os.path.join(screenshot_directory, f'{username}_profile.pdf')
 
             return True
         except Exception as e:
             print(f"Error scraping profile: {e}")
             return False
-        
+
     def save_to_pdf(self):
         try:
             if not self.profile_data or not self.screenshot_file or not self.output_file:
@@ -139,7 +172,14 @@ class ModelClass:
                 pdf.chapter_title(f"Profile: {row['username']}")
                 pdf.chapter_body(f"Name: {row['name']}\nBio: {row['bio']}\nPosts: {row['posts']}\nFollowers: {row['followers']}\nFollowing: {row['following']}\n")
 
+                # Add followers list
+                if self.followers:
+                    followers_list = "\n".join(self.followers)
+                    pdf.chapter_body(f"Followers List:\n{followers_list}\n")
+
             pdf.add_image(self.screenshot_file)
+            pdf.add_page()
+            pdf.add_image(self.screenshot_file_followers)
             pdf.output(self.output_file)
             print(f"PDF saved as {self.output_file}")
 
@@ -147,11 +187,10 @@ class ModelClass:
         except Exception as e:
             print(f"{e}")
             return False
-           
 
     def handle_not_now_popup(self):
-        time.sleep(1) 
-        
+        time.sleep(1)
+
         try:
             not_now_button = self.driver.find_element(By.XPATH, '//div[text()="Not now"]')
             not_now_button.click()
@@ -165,3 +204,4 @@ class ModelClass:
 
     def close(self):
         self.driver.quit()
+
