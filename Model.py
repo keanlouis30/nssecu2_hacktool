@@ -24,6 +24,7 @@ class ModelClass:
         password_input.send_keys(Keys.RETURN)
         
         time.sleep(5)
+        self.handle_not_now_popup()
         try:
             self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
             return True
@@ -34,15 +35,19 @@ class ModelClass:
         self.driver.get(f'https://www.instagram.com/{username}/')
         time.sleep(3)
 
-        profile_data = {
+        try:
+            profile_data = {
             'username': username,
             'name': self.driver.find_element(By.XPATH, '//h1').text,
             'bio': self.driver.find_element(By.XPATH, '//div[@class="-vDIg"]/span').text,
             'posts': self.driver.find_element(By.XPATH, '//li[1]/span/span').text,
             'followers': self.driver.find_element(By.XPATH, '//li[2]/a/span').get_attribute('title'),
             'following': self.driver.find_element(By.XPATH, '//li[3]/a/span').text,
-        }
-        return profile_data
+            }
+            return True
+        except:
+            return False
+        
 
     def search_facebook_profile(self, name):
         self.driver.get('https://www.facebook.com/')
@@ -118,5 +123,15 @@ class ModelClass:
             time.sleep(3)
             return True
         
+    def handle_not_now_popup(self):
+        time.sleep(5) 
+        
+        try:
+            not_now_button = self.driver.find_element(By.XPATH, '//div[text()="Not now"]')
+            not_now_button.click()
+            print("Clicked 'Not now' button.")
+        except:
+            print("'Not now' button not found or already handled.")
+
     def close(self):
         self.driver.quit()

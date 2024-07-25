@@ -27,6 +27,7 @@ class ControllerClass:
         self.scrape_done = False
         self.username = ""
         self.password = ""
+        self.target_username = ""
         # Bind the button click and Enter key event to the process_input method
         self.view.sendButton.config(command=self.process_input)
         self.view.userInput.bind("<Return>", lambda event: self.process_input())
@@ -34,7 +35,7 @@ class ControllerClass:
         self.commands = {
             "[/help]": "List all commands",
             "[/loginUser (username)]": "Input username for logging in",
-            "[/loginPass (password)]": "Input password for logging in",
+            "[/loginPass]": "Input password for logging in",
             "[/igLogin]": "Login to Instagram",
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
@@ -66,15 +67,9 @@ class ControllerClass:
                 self.view.display_message("Username acquired")
             else:
                 self.view.display_message("Username not provided.")
-        elif command.startswith("/loginPass"):
+        elif command == "/loginPass":
             if self.username_acquired:
-                split_string = command.split()
-                if len(split_string) > 1:
-                    self.password = split_string[1]
-                    self.password_acquired = True
-                    self.view.display_message("Password acquired")
-                else:
-                    self.view.display_message("Password not provided.")
+                self.view.display_message("Please provide password")
             else:
                 self.view.display_message("Enter username first")
         elif command == "/igLogin":
@@ -89,15 +84,18 @@ class ControllerClass:
         elif command.startswith("/targetUsername"):
             if self.ig_logged_in:
                 split_string = command.split()
-                username = split_string[1]
-                self.view.display_message(F"The target username is: {username}")
+                self.target_username = split_string[1]
+                self.view.display_message(F"The target username is: {self.target_username}")
                 self.target_user_acquired = True
             else:
                 self.view.display_message("Error! User is not yet logged in")
         elif command == "/scrape":
             if self.target_user_acquired:
                 self.view.display_message("Finding the information of this person")
-                self.scrape_done = True
+                if self.model.scrape_profile(self.target_username):
+                    self.scrape_done = True
+                else:
+                    self.view.display_message("Person not found")
             else:
                 self.view.display_message("Target username not provided")
         elif command == "/generateReport":

@@ -34,3 +34,5 @@ python Main.py
 Available Commands
 Type /help within the program to see a list of possible commands.
 
+exe
+pyinstaller --name=ProfileScraper --onefile --windowed --add-binary "C:\Users\keanl\Documents\GitHub\nssecu2_hacktool\edgedriver_win64\msedgedriver.exe;." Main.py
