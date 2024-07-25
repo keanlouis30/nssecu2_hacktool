@@ -165,23 +165,23 @@ class ModelClass:
 
     def search_twitter(self, username):
         try:
+            #Just made it so that it will use target Username, so that it will check if profile exist. If profile exist then make txt url file for the profile
+            #Not really profile matching rn, more twitter searching. Will add functionality tomo for trying to search using IG things
+        
             self.driver.get(f'https://twitter.com/{username}')
-            time.sleep(5)  
+            time.sleep(5)
 
             
             if "This account doesn’t exist" in self.driver.page_source:
                 print("Account does not exist.")
                 return False
-            
-            close = self.driver.find_element(By.XPATH, '//div[text()="Not now"]')
-            close.click()
-            print("Clicked 'Not now' button.")
-            time.sleep(3)
-            screenshot_directory = 'Screenshots'
-            os.makedirs(screenshot_directory, exist_ok=True)
-            self.screenshot_file = os.path.join(screenshot_directory, f'{username}_twitter_profile.png')
-            self.driver.get_screenshot_as_file(self.screenshot_file)
-            print(f"Screenshot saved as {self.screenshot_file}")
+
+    
+            profile_url = f'https://twitter.com/{username}'
+            file_name = f'{username}_twitter_profile.txt'
+            with open(file_name, 'w') as file:
+                file.write(profile_url)
+            print(f"Profile URL saved in {file_name}")
 
             return True
         except Exception as e:
