@@ -44,13 +44,38 @@ class ModelClass:
         }
         return profile_data
 
+    def search_facebook_profile(self, name):
+        self.driver.get('https://www.facebook.com/')
+        time.sleep(3)
+        
+        search_box = self.driver.find_element(By.XPATH, '//input[@aria-label="Search Facebook"]')
+        search_box.send_keys(name)
+        search_box.send_keys(Keys.RETURN)
+        
+        time.sleep(3)
+        
+        profiles = self.driver.find_elements(By.XPATH, '//div[@role="article"]//a[@role="link"]')
+        if profiles:
+            profiles[0].click()
+            time.sleep(3)
+            return self.scrape_facebook_profile()
+        return None
+
+    def scrape_facebook_profile(self):
+        profile_data = {
+            'name': self.driver.find_element(By.XPATH, '//h1').text,
+            'bio': self.driver.find_element(By.XPATH, '//div[@data-testid="profile_intro_card_bio"]').text if self.driver.find_elements(By.XPATH, '//div[@data-testid="profile_intro_card_bio"]') else '',
+            'friends': self.driver.find_element(By.XPATH, '//div[@data-testid="profile_intro_card_friends"]').text if self.driver.find_elements(By.XPATH, '//div[@data-testid="profile_intro_card_friends"]') else ''
+        }
+        return profile_data
+
     def save_to_pdf(self, profile_data, output_file):
         data = pd.DataFrame([profile_data])
 
         class PDF(FPDF):
             def header(self):
                 self.set_font('Arial', 'B', 12)
-                self.cell(0, 10, 'Instagram Profile Report', 0, 1, 'C')
+                self.cell(0, 10, 'Social Media Profile Report', 0, 1, 'C')
 
             def chapter_title(self, title):
                 self.set_font('Arial', 'B', 12)
@@ -71,26 +96,27 @@ class ModelClass:
 
         pdf.output(output_file)
         
-    def logout(self):
-        time.sleep(3)
-        profile_button = self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
-        profile_button.click()
+    def logout(self, platform='instagram'):
+        if platform == 'instagram':
+            time.sleep(3)
+            profile_button = self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
+            profile_button.click()
 
-        time.sleep(2)
-        profile_menu = self.driver.find_element(By.XPATH, '//div[@role="menu"]')
-        logout_button = profile_menu.find_element(By.XPATH, '//div[text()="Log Out"]')
+            time.sleep(2)
+            profile_menu = self.driver.find_element(By.XPATH, '//div[@role="menu"]')
+            logout_button = profile_menu.find_element(By.XPATH, '//div[text()="Log Out"]')
 
-        logout_button.click()
+            logout_button.click()
 
-        time.sleep(2)
-        try:
-            confirm_button = self.driver.find_element(By.XPATH, '//button[text()="Log Out"]')
-            confirm_button.click()
-        except:
-            pass  
+            time.sleep(2)
+            try:
+                confirm_button = self.driver.find_element(By.XPATH, '//button[text()="Log Out"]')
+                confirm_button.click()
+            except:
+                pass  
 
-        time.sleep(3) 
-        return True
-
+            time.sleep(3)
+            return True
+        
     def close(self):
         self.driver.quit()
