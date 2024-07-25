@@ -35,6 +35,7 @@ class ControllerClass:
         self.commands = {
             "[/help]": "List all commands",
             "[/loginUser (username)]": "Input username for logging in",
+            "ctrl+m": "Use [ctrl+m] to mask the user input (useful for hiding password input)",
             "[/loginPass (password)]": "Input password for logging in",
             "[/igLogin]": "Login to Instagram",
             "[/targetUsername (username)]": "Provide the target's Instagram username",
