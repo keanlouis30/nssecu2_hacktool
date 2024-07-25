@@ -99,6 +99,7 @@ class ControllerClass:
             if self.target_user_acquired:
                 self.view.display_message("Finding the information of this person")
                 if self.model.scrape_profile(self.target_username):
+                    self.view.display_message("Scraping Done")
                     self.scrape_done = True
                 else:
                     self.view.display_message("Person not found")
@@ -107,6 +108,8 @@ class ControllerClass:
         elif command == "/generateReport":
             if self.scrape_done:
                 self.view.display_message("Generating file report via PDF")
+                if self.model.save_to_pdf():
+                    self.view.display_message("PDF generated!")
             else:
                 self.view.display_message("Cannot generate report due to lacking information")
         elif command == "/igLogout":
