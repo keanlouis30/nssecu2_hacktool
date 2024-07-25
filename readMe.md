@@ -1,13 +1,36 @@
-To start the program users must have [selenium, beautifulsoup4, pandas, FPDF, tk]
+## Prerequisites
 
-To install the following python libraries:
-    - pip install selenium beautifulsoup4 pandas FPDF tk
+To run this program, ensure you have the following Python libraries installed:
+- `selenium`
+- `beautifulsoup4`
+- `pandas`
+- `FPDF`
+- `tk`
 
-To verify installation of said libaries:
-    - pip show selenium beautifulsoup4 pandas FPDF tk
+### Installation
 
-GUI User Guide:
-    - Run 'Main.py'
-        - python Main.py
-    - Type [/help] for the list of possible commands
+To install the required libraries, run the following command:
+
+```sh
+pip install selenium beautifulsoup4 pandas FPDF tk
+```
+
+Verification
+To verify the installation of the libraries, use the following command:
+
+```sh
+pip show selenium beautifulsoup4 pandas FPDF tk
+```
+
+GUI User Guide
+
+Running the Program
+To start the program, execute the Main.py file:
+
+```sh
+python Main.py
+```
+
+Available Commands
+Type /help within the program to see a list of possible commands.
 
