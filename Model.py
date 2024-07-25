@@ -13,7 +13,6 @@ class ModelClass:
         self.driver = webdriver.Edge(service=service)
 
     def login_instagram(self, username, password):
-        """Log in to Instagram."""
         self.driver.get('https://www.instagram.com/accounts/login/')
         time.sleep(3)
 
@@ -25,9 +24,13 @@ class ModelClass:
         password_input.send_keys(Keys.RETURN)
         
         time.sleep(5)
+        try:
+            self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
+            return True
+        except:
+            return False
 
     def scrape_profile(self, username):
-        """Scrape Instagram profile data."""
         self.driver.get(f'https://www.instagram.com/{username}/')
         time.sleep(3)
 
@@ -42,7 +45,6 @@ class ModelClass:
         return profile_data
 
     def save_to_pdf(self, profile_data, output_file):
-        """Save profile data to a PDF report."""
         data = pd.DataFrame([profile_data])
 
         class PDF(FPDF):
@@ -68,7 +70,27 @@ class ModelClass:
             pdf.chapter_body(f"Name: {row['name']}\nBio: {row['bio']}\nPosts: {row['posts']}\nFollowers: {row['followers']}\nFollowing: {row['following']}\n")
 
         pdf.output(output_file)
+        
+    def logout(self):
+        time.sleep(3)
+        profile_button = self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
+        profile_button.click()
+
+        time.sleep(2)
+        profile_menu = self.driver.find_element(By.XPATH, '//div[@role="menu"]')
+        logout_button = profile_menu.find_element(By.XPATH, '//div[text()="Log Out"]')
+
+        logout_button.click()
+
+        time.sleep(2)
+        try:
+            confirm_button = self.driver.find_element(By.XPATH, '//button[text()="Log Out"]')
+            confirm_button.click()
+        except:
+            pass  
+
+        time.sleep(3) 
+        return True
 
     def close(self):
-        """Close the WebDriver."""
         self.driver.quit()

@@ -79,8 +79,11 @@ class ControllerClass:
                 self.view.display_message("Enter username first")
         elif command == "/igLogin":
             if self.username_acquired and self.password_acquired:
-                self.view.display_message("Login")
-                self.ig_logged_in = True
+                if self.model.login_instagram(self.username, self.password):
+                    self.view.display_message("Login success!")
+                    self.ig_logged_in = True
+                else:
+                    self.view.display_message("Error loggin in")
             else:
                 self.view.display_message("Error! Username or Password is not provided")
         elif command.startswith("/targetUsername"):
@@ -105,12 +108,16 @@ class ControllerClass:
         elif command == "/igLogout":
             if self.ig_logged_in:
                 self.view.display_message("Logging out and removing username and password")
-                self.username = ""
-                self.password = ""
-                self.ig_logged_in = False
-                self.username_acquired = False
-                self.password_acquired = False
-                print("The credentials are: " + self.username + " " + self.password + "test")
+                if self.model.logout():  
+                    self.username = ""
+                    self.password = ""
+                    self.ig_logged_in = False
+                    self.username_acquired = False
+                    self.password_acquired = False
+                    #print("The credentials are: " + self.username + " " + self.password + "test")
+                    self.view.display_message("Logout success!")
+                else:
+                    self.view.display_message("The web logout is unsucessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
         else:
