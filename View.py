@@ -28,7 +28,7 @@ class ViewClass:
         self.panel1.pack(fill=tk.BOTH, expand=True)
         
         # Create user input field
-        self.userInput = tk.Entry(self.panel1, bg="#2F2F2F", fg="white", insertbackground="white")
+        self.userInput = tk.Entry(self.panel1, bg="#2F2F2F", fg="white", insertbackground="white", show='')
         self.userInput.grid(row=1, column=0, columnspan=4, sticky="ew", padx=(0, 10))
         
         # Create send button
@@ -51,15 +51,28 @@ class ViewClass:
         
         # Bind Enter key to send message
         self.userInput.bind("<Return>", lambda event: self.send_message())
-    
+        
+        # Set the initial masking state
+        self.masked = False
+        
+        # Bind Ctrl + M to toggle masking
+        self.root.bind('<Control-m>', self.toggle_masking)
+
     def send_message(self, input_text):
         #print("send message is called")
-        if input_text:
+        if input_text.startswith("/loginPass"):
+            self.chatArea.config(state=tk.NORMAL)
+            self.chatArea.insert(tk.END, f"You: \n[redacted] \n\n")
+            self.chatArea.see(tk.END)
+            self.chatArea.config(state=tk.DISABLED)
+            self.userInput.delete(0, tk.END)
+        else:
             self.chatArea.config(state=tk.NORMAL)
             self.chatArea.insert(tk.END, f"You: \n{input_text} \n\n")
             self.chatArea.see(tk.END)
             self.chatArea.config(state=tk.DISABLED)
             self.userInput.delete(0, tk.END)
+        
 
     def display_message(self, message):
         self.chatArea.config(state=tk.NORMAL)
@@ -71,4 +84,12 @@ class ViewClass:
         input_text = self.userInput.get().strip()
         self.userInput.delete(0, tk.END)
         return input_text
+
+    def toggle_masking(self, event=None):
+        if self.masked:
+            self.userInput.config(show='')  # Show actual characters
+        else:
+            self.userInput.config(show='*')  # Mask characters with asterisks
+        self.masked = not self.masked
+
 

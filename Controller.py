@@ -35,7 +35,7 @@ class ControllerClass:
         self.commands = {
             "[/help]": "List all commands",
             "[/loginUser (username)]": "Input username for logging in",
-            "[/loginPass]": "Input password for logging in",
+            "[/loginPass (password)]": "Input password for logging in",
             "[/igLogin]": "Login to Instagram",
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
@@ -67,9 +67,15 @@ class ControllerClass:
                 self.view.display_message("Username acquired")
             else:
                 self.view.display_message("Username not provided.")
-        elif command == "/loginPass":
+        elif command.startswith("/loginPass"):
             if self.username_acquired:
-                self.view.display_message("Please provide password")
+                split_string = command.split()
+                if len(split_string) > 1:
+                    self.password = split_string[1]
+                    self.password_acquired = True
+                    self.view.display_message("Password acquired")
+                else:
+                    self.view.display_message("Password not provided.")
             else:
                 self.view.display_message("Enter username first")
         elif command == "/igLogin":
