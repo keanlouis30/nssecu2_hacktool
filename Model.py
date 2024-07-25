@@ -26,7 +26,7 @@ class ModelClass:
         time.sleep(5)
         self.handle_not_now_popup()
         try:
-            self.driver.find_element(By.XPATH, '//span[@aria-label="Profile"]')
+            self.driver.find_element(By.XPATH, '//svg[@aria-label="Explore"]')
             return True
         except:
             return False
