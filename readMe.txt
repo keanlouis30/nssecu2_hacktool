@@ -8,5 +8,6 @@ To verify installation of said libaries:
 
 GUI User Guide:
     - Run 'Main.py'
+        - python Main.py
     - Type [/help] for the list of possible commands
 
