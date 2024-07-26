@@ -105,7 +105,7 @@ class ModelClass:
 
             # Click the followers link
             try:
-                followers_link = WebDriverWait(self.driver, 10).until(
+                followers_link = WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/followers/"]'))
                 )
                 followers_link.click()
@@ -147,7 +147,7 @@ class ModelClass:
 
             # Click the following link
             try:
-                following_link = WebDriverWait(self.driver, 10).until(
+                following_link = WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/following/"]'))
                 )
                 following_link.click()

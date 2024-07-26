@@ -41,3 +41,13 @@ pyinstaller --name=ProfileScraper --onefile --windowed --add-binary "C:\Users\ke
 
 For password masking purposes 
 Press control+m
+
+Procedures
+
+```sh
+/loginUser [username]
+/loginPass [password] (use ctrl+m for masking)
+/targetUsername [username]
+/scrape
+/generateReport
+```
