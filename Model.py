@@ -39,12 +39,8 @@ class ModelClass:
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
-        
-        # Wait until the username input field is present
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.NAME, 'username'))
-        )
-        
+        time.sleep(3)
+
         username_input = self.driver.find_element(By.NAME, 'username')
         password_input = self.driver.find_element(By.NAME, 'password')
 
@@ -52,11 +48,8 @@ class ModelClass:
         password_input.send_keys(password)
         password_input.send_keys(Keys.RETURN)
 
+        time.sleep(5)
         try:
-            # Wait for the next page to load and handle any pop-ups if they appear
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//*[text()='Not Now']"))
-            )
             self.handle_not_now_popup()
             return True
         except Exception as e:
@@ -202,7 +195,7 @@ class ModelClass:
                 try:
                     self.driver.execute_script("window.scrollTo(0,4000);")
                     time.sleep(10) 
-                    images = self.driver.find_elements(By.TAG_NAME, 'img')
+                    images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img") 
                     images = [image.get_attribute('src') for image in images]
                     folder_path = os.path.join(os.getcwd(), f"{username}_posts")
                     os.makedirs(folder_path, exist_ok=True)
