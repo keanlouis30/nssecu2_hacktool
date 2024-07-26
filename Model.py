@@ -109,7 +109,7 @@ class ModelClass:
                     EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/followers/"]'))
                 )
                 followers_link.click()
-                WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
                 )
             except Exception as e:
@@ -117,7 +117,7 @@ class ModelClass:
                 return
             
             try:
-                followers_list = WebDriverWait(self.driver, 10).until(
+                followers_list = WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
                 )
                 last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
@@ -137,7 +137,7 @@ class ModelClass:
 
             time.sleep(3)
             try:
-                close_button = WebDriverWait(self.driver, 10).until(
+                close_button = WebDriverWait(self.driver, 500).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
                 )
                 close_button.click()
@@ -152,7 +152,7 @@ class ModelClass:
                     EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/following/"]'))
                 )
                 following_link.click()
-                WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
                 )
             except Exception as e:
@@ -160,7 +160,7 @@ class ModelClass:
                 return
             
             try:
-                following_list = WebDriverWait(self.driver, 10).until(
+                following_list = WebDriverWait(self.driver, 500).until(
                     EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
                 )
                 last_height = self.driver.execute_script("return arguments[0].scrollHeight", following_list)
@@ -180,7 +180,7 @@ class ModelClass:
 
             time.sleep(3)
             try:
-                close_button = WebDriverWait(self.driver, 10).until(
+                close_button = WebDriverWait(self.driver, 500).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
                 )
                 close_button.click()
