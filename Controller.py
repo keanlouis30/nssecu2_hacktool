@@ -89,13 +89,10 @@ class ControllerClass:
             else:
                 self.view.display_message("Error! Username or Password is not provided")
         elif command.startswith("/targetUsername"):
-            if self.ig_logged_in:
                 split_string = command.split()
                 self.target_username = split_string[1]
                 self.view.display_message(F"The target username is: {self.target_username}")
                 self.target_user_acquired = True
-            else:
-                self.view.display_message("Error! User is not yet logged in")
         elif command == "/scrape":
             if self.target_user_acquired:
                 self.view.display_message("Finding the information of this person")

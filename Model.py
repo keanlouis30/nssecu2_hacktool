@@ -61,9 +61,18 @@ class ModelClass:
             # Wait for specific elements to be visible by sleeping
             time.sleep(3)  # Wait to ensure the profile page is fully loaded
 
+            # Check if the account is private
+            try:
+                private_account_element = self.driver.find_element(By.XPATH, '//span[@class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x1tu3fi x3x7a5m x10wh9bi x1wdrske x8viiok x18hxmgj" and text()="This account is private"]')
+                if private_account_element:
+                    self.followers = ["This account is private"]
+                    print("This account is private")
+            except Exception:
+                self.followers = []
+
             # Extract data, setting to None if the element is not found
             try:
-                name = self.driver.find_element(By.XPATH, '//span[@class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj"]').text
+                name = self.driver.find_element(By.XPATH, '//span[@class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x1tu3fi x3x7a5m x10wh9bi x1wdrske x8viiok x18hxmgj"]').text
             except Exception:
                 name = None
 
@@ -102,35 +111,37 @@ class ModelClass:
             self.driver.get_screenshot_as_file(self.screenshot_file)
             print(f"Screenshot saved as {self.screenshot_file}")
 
-            # Click the followers link
-            try:
-                followers_link = self.driver.find_element(By.XPATH, f'//a[@href="/{username}/followers/"]')
-                followers_link.click()
-                time.sleep(3)  # Allow time for the followers list to load
-            except Exception as e:
-                print(f"Error clicking followers link: {e}")
+            # Only attempt to click followers link and scrape followers if the account is not private
+            if self.followers != ["This account is private"]:
+                # Click the followers link
+                try:
+                    followers_link = self.driver.find_element(By.XPATH, f'//a[@href="/{username}/followers/"]')
+                    followers_link.click()
+                    time.sleep(3)  # Allow time for the followers list to load
+                except Exception as e:
+                    print(f"Error clicking followers link: {e}")
 
-            # Scroll to load all followers
-            try:
-                followers_list = self.driver.find_element(By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]')
-                last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+                # Scroll to load all followers
+                try:
+                    followers_list = self.driver.find_element(By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]')
+                    last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
 
-                while True:
-                    self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", followers_list)
-                    time.sleep(2)
-                    new_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
-                    if new_height == last_height:
-                        break
-                    last_height = new_height
+                    while True:
+                        self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", followers_list)
+                        time.sleep(2)
+                        new_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+                        if new_height == last_height:
+                            break
+                        last_height = new_height
 
-                followers_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
-                self.followers = [elem.text for elem in followers_elems]
-            except Exception as e:
-                print(f"Error scraping followers: {e}")
+                    followers_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
+                    self.followers = [elem.text for elem in followers_elems]
+                except Exception as e:
+                    print(f"Error scraping followers: {e}")
 
-            self.screenshot_file_followers = os.path.join(screenshot_directory, f'{username}_profile_followers.png')
-            self.driver.get_screenshot_as_file(self.screenshot_file_followers)
-            print(f"Screenshot saved as {self.screenshot_file_followers}")
+                self.screenshot_file_followers = os.path.join(screenshot_directory, f'{username}_profile_followers.png')
+                self.driver.get_screenshot_as_file(self.screenshot_file_followers)
+                print(f"Screenshot saved as {self.screenshot_file_followers}")
 
             self.output_file = os.path.join(screenshot_directory, f'{username}_profile.pdf')
 
@@ -194,14 +205,29 @@ class ModelClass:
         try:
             not_now_button = self.driver.find_element(By.XPATH, '//div[text()="Not now"]')
             not_now_button.click()
-            print("Clicked 'Not now' button.")
-            time.sleep(3)
-            not_now_button = self.driver.find_element(By.XPATH, '//button[contains(@class, "_a9--") and contains(@class, "_ap36") and contains(@class, "_a9_1") and text()="Not Now"]')
-            not_now_button.click()
-            print("Clicked 'Not now' button.")
+            time.sleep(2)
         except Exception as e:
-            print(f"'Not now' button not found or already handled: {e}")
+            print(f"Not now button not found: {e}")
 
-    def close(self):
-        self.driver.quit()
+        try:
+            not_now_button_2 = self.driver.find_element(By.XPATH, '//button[text()="Not Now"]')
+            not_now_button_2.click()
+            time.sleep(2)
+        except Exception as e:
+            print(f"Not now button 2 not found: {e}")
 
+    def logout(self):
+        try:
+            self.driver.get(f'https://www.instagram.com/{self.username}/')
+            time.sleep(3)
+            profile_icon = self.driver.find_element(By.XPATH, '//span[@class="_2dbep qNELH"]')
+            profile_icon.click()
+            time.sleep(2)
+            logout_button = self.driver.find_element(By.XPATH, '//button[text()="Log Out"]')
+            logout_button.click()
+            time.sleep(3)
+            self.driver.quit()
+            return True
+        except Exception as e:
+            print(f"Error logging out: {e}")
+            return False
