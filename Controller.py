@@ -141,12 +141,12 @@ class ControllerClass:
                 if twitter_result:
                     self.view.display_message("Twitter scraping completed successfully")
                 else:
-                    self.view.display_message("Error scraping Twitter")
+                    self.view.display_message("No exact profile on Twitter")
 
                 if youtube_result:
                     self.view.display_message("YouTube scraping completed successfully")
                 else:
-                    self.view.display_message("Error scraping YouTube")
+                    self.view.display_message("No exact profile on Youtube")
                 
                 if google_results:
                     self.view.display_message("Google search completed successfully")
