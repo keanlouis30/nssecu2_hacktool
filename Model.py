@@ -237,7 +237,7 @@ class ModelClass:
 
             for url in urls:
                 if site in url:
-                    if site == "twitter.com":
+                    if site != "facebook.com" :
                         username = "@" + username
                     search_results.append(url)
 
