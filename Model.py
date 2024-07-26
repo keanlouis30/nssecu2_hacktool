@@ -39,8 +39,12 @@ class ModelClass:
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
-        time.sleep(3)
-
+        
+        # Wait until the username input field is present
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.NAME, 'username'))
+        )
+        
         username_input = self.driver.find_element(By.NAME, 'username')
         password_input = self.driver.find_element(By.NAME, 'password')
 
@@ -48,8 +52,11 @@ class ModelClass:
         password_input.send_keys(password)
         password_input.send_keys(Keys.RETURN)
 
-        time.sleep(5)
         try:
+            # Wait for the next page to load and handle any pop-ups if they appear
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//*[text()='Not Now']"))
+            )
             self.handle_not_now_popup()
             return True
         except Exception as e:
@@ -135,6 +142,7 @@ class ModelClass:
             except Exception as e:
                 print(f"Error scraping followers: {e}")
 
+            time.sleep(3)
             try:
                 close_button = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
@@ -177,6 +185,7 @@ class ModelClass:
             except Exception as e:
                 print(f"Error scraping following: {e}")
 
+            time.sleep(3)
             try:
                 close_button = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
