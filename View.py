@@ -23,6 +23,21 @@ class ViewClass:
         self.root = root
         self.root.title("Social Media Scraper")
         
+        # Get screen dimensions
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        
+        # Window dimensions
+        window_width = 800
+        window_height = 600
+        
+        # Calculate position
+        x_position = screen_width // 2
+        y_position = 0
+        
+        # Set window size and position
+        self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+        
         # Create panel1
         self.panel1 = tk.Frame(root, bg="#212121", padx=20, pady=20)
         self.panel1.pack(fill=tk.BOTH, expand=True)
@@ -59,7 +74,6 @@ class ViewClass:
         self.root.bind('<Control-m>', self.toggle_masking)
 
     def send_message(self, input_text):
-        #print("send message is called")
         if input_text.startswith("/loginPass"):
             self.chatArea.config(state=tk.NORMAL)
             self.chatArea.insert(tk.END, f"You: \n[redacted] \n\n")
@@ -91,5 +105,3 @@ class ViewClass:
         else:
             self.userInput.config(show='*')  # Mask characters with asterisks
         self.masked = not self.masked
-
-
