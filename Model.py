@@ -18,8 +18,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.service import Service
 import time
 import pandas as pd
-from fpdf import FPDF
+from fpdf import FPDF 
 import os
+import requests 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 class ModelClass:
     def __init__(self, edgedriver_path):
@@ -52,50 +56,38 @@ class ModelClass:
             print(f"Error during login: {e}")
             return False
 
-    def scrape_profile(self, username):
+    def scrape_profile(self, username, ig_logged_in):
         self.username = username
+        #get to insta profile 
         self.driver.get(f'https://www.instagram.com/{username}/')
-        time.sleep(5)  # Allow some time for the page to load
-
+        time.sleep(5)  
+        
         try:
-            # Wait for specific elements to be visible by sleeping
-            time.sleep(3)  # Wait to ensure the profile page is fully loaded
-
-            # Check if the account is private
+            time.sleep(5)  
             try:
-                private_account_element = self.driver.find_element(By.XPATH, '//span[@class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x1tu3fi x3x7a5m x10wh9bi x1wdrske x8viiok x18hxmgj" and text()="This account is private"]')
-                if private_account_element:
-                    self.followers = ["This account is private"]
-                    print("This account is private")
-            except Exception:
-                self.followers = []
-
-            # Extract data, setting to None if the element is not found
-            try:
-                name = self.driver.find_element(By.XPATH, '//span[@class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x1tu3fi x3x7a5m x10wh9bi x1wdrske x8viiok x18hxmgj"]').text
+                name_element = self.driver.find_element(By.TAG_NAME, 'h2')
+                name = name_element.text if name_element else None
             except Exception:
                 name = None
-
             try:
                 bio = self.driver.find_element(By.XPATH, '//span[@class="_ap3a _aaco _aacu _aacx _aad7 _aade"]').text
             except Exception:
                 bio = None
 
             try:
-                posts = self.driver.find_element(By.XPATH, '//span[contains(@class, "xkhd6sd")]').text
-            except Exception:
-                posts = None
-
-            try:
-                followers = self.driver.find_element(By.XPATH, '//a[contains(@href, "/followers/")]/span').text
-            except Exception:
-                followers = None
-
-            try:
-                following = self.driver.find_element(By.XPATH, '//a[contains(@href, "/following/")]/span').text
-            except Exception:
-                following = None
-
+                ul = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
+                items = ul.find_elements(By.TAG_NAME, 'li')
+                for li in items:
+                    text = li.text
+                    if 'posts' in text:
+                        posts = int(text.split()[0].replace(',', ''))
+                    elif 'followers' in text:
+                        followers = int(text.split()[0].replace(',', ''))
+                    elif 'following' in text:
+                        following = int(text.split()[0].replace(',', ''))
+            except Exception as e:
+                print(f"Error in getting posts etc: {e}")
+            
             self.profile_data = {
                 'username': username,
                 'name': name,
@@ -111,39 +103,111 @@ class ModelClass:
             self.driver.get_screenshot_as_file(self.screenshot_file)
             print(f"Screenshot saved as {self.screenshot_file}")
 
-            # Only attempt to click followers link and scrape followers if the account is not private
-            if self.followers != ["This account is private"]:
-                # Click the followers link
-                try:
-                    followers_link = self.driver.find_element(By.XPATH, f'//a[@href="/{username}/followers/"]')
-                    followers_link.click()
-                    time.sleep(3)  # Allow time for the followers list to load
-                except Exception as e:
-                    print(f"Error clicking followers link: {e}")
+            # Click the followers link
+            try:
+                followers_link = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/followers/"]'))
+                )
+                followers_link.click()
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
+                )
+            except Exception as e:
+                print(f"Error clicking followers link: {e}")
+                return
+            
+            try:
+                followers_list = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
+                )
+                last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
 
-                # Scroll to load all followers
-                try:
-                    followers_list = self.driver.find_element(By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]')
-                    last_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+                while True:
+                    self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", followers_list)
+                    time.sleep(2)
+                    new_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
+                    if new_height == last_height:
+                        break
+                    last_height = new_height
 
-                    while True:
-                        self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", followers_list)
-                        time.sleep(2)
-                        new_height = self.driver.execute_script("return arguments[0].scrollHeight", followers_list)
-                        if new_height == last_height:
-                            break
-                        last_height = new_height
+                followers_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
+                self.followers = [elem.text for elem in followers_elems]
+            except Exception as e:
+                print(f"Error scraping followers: {e}")
 
-                    followers_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
-                    self.followers = [elem.text for elem in followers_elems]
-                except Exception as e:
-                    print(f"Error scraping followers: {e}")
+            try:
+                close_button = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
+                )
+                close_button.click()
+                print("Close button clicked.")
+            except Exception as e:
+                print(f"Error clicking close button: {e}")
 
-                self.screenshot_file_followers = os.path.join(screenshot_directory, f'{username}_profile_followers.png')
-                self.driver.get_screenshot_as_file(self.screenshot_file_followers)
-                print(f"Screenshot saved as {self.screenshot_file_followers}")
+
+            # Click the following link
+            try:
+                following_link = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/following/"]'))
+                )
+                following_link.click()
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
+                )
+            except Exception as e:
+                print(f"Error clicking following link: {e}")
+                return
+            
+            try:
+                following_list = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
+                )
+                last_height = self.driver.execute_script("return arguments[0].scrollHeight", following_list)
+
+                while True:
+                    self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", following_list)
+                    time.sleep(2)
+                    new_height = self.driver.execute_script("return arguments[0].scrollHeight", following_list)
+                    if new_height == last_height:
+                        break
+                    last_height = new_height
+
+                following_elems = self.driver.find_elements(By.XPATH, '//span[@class="_ap3a _aaco _aacw _aacx _aad7 _aade"]')
+                self.followings = [elem.text for elem in following_elems]
+            except Exception as e:
+                print(f"Error scraping following: {e}")
+
+            try:
+                close_button = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, 'button._abl-'))
+                )
+                close_button.click()
+                print("Close button clicked.")
+            except Exception as e:
+                print(f"Error clicking close button: {e}")
+
 
             self.output_file = os.path.join(screenshot_directory, f'{username}_profile.pdf')
+
+            if posts != 0:
+                try:
+                    self.driver.execute_script("window.scrollTo(0,4000);")
+                    time.sleep(10) 
+                    images = self.driver.find_elements(By.TAG_NAME, 'img')
+                    images = [image.get_attribute('src') for image in images]
+                    folder_path = os.path.join(os.getcwd(), f"{username}_posts")
+                    os.makedirs(folder_path, exist_ok=True)
+                    for i, url in enumerate(images):
+                        if url:
+                            try:
+                                img_data = requests.get(url).content
+                                with open(os.path.join(folder_path, f'image_{i + 1}.jpg'), 'wb') as handler:
+                                    handler.write(img_data)
+                                print(f"Image {i + 1} saved.")
+                            except Exception as e:
+                                print(f"Error saving image {i + 1}: {e}")
+                except:
+                    pass
 
             return True
         except Exception as e:
@@ -151,53 +215,53 @@ class ModelClass:
             return False
 
     def save_to_pdf(self):
-        try:
-            if not self.profile_data or not self.screenshot_file or not self.output_file:
-                print("Profile data, screenshot file, or output file is missing.")
-                return False
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 16)
+        pdf.cell(0, 10, 'Social Media Profile Report', 0, 1, 'C')
+        pdf.ln(10)
 
-            data = pd.DataFrame([self.profile_data])
+        if self.profile_data:
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(0, 10, f"Profile: {self.profile_data.get('username')}", 0, 1, 'L')
+            pdf.ln(10)
 
-            class PDF(FPDF):
-                def header(self):
-                    self.set_font('Arial', 'B', 12)
-                    self.cell(0, 10, f'Social Media Profile Report', 0, 1, 'C')
+            pdf.set_font('Arial', '', 12)
+            pdf.cell(0, 10, f"Name: {self.profile_data.get('name')}", 0, 1, 'L')
+            pdf.cell(0, 10, f"Bio: {self.profile_data.get('bio')}", 0, 1, 'L')
+            pdf.cell(0, 10, f"Posts: {self.profile_data.get('posts')}", 0, 1, 'L')
+            pdf.cell(0, 10, f"Followers: {self.profile_data.get('followers')}", 0, 1, 'L')
+            pdf.cell(0, 10, f"Following: {self.profile_data.get('following')}", 0, 1, 'L')
+            pdf.ln(10)
 
-                def chapter_title(self, title):
-                    self.set_font('Arial', 'B', 12)
-                    self.cell(0, 10, title, 0, 1, 'L')
-                    self.ln(10)
+            if self.followers:
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 10, "Followers List:", 0, 1, 'L')
+                pdf.ln(10)
+                pdf.set_font('Arial', '', 12)
+                followers_list = "\n".join(self.followers)
+                pdf.multi_cell(0, 10, followers_list)
+                pdf.ln(10)
 
-                def chapter_body(self, body):
-                    self.set_font('Arial', '', 12)
-                    self.multi_cell(0, 10, body)
-                    self.ln()
+            if self.followings:
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 10, "Following List:", 0, 1, 'L')
+                pdf.ln(10)
+                pdf.set_font('Arial', '', 12)
+                followings_list = "\n".join(self.followings)
+                pdf.multi_cell(0, 10, followings_list)
+                pdf.ln(10)
 
-                def add_image(self, image_path):
-                    self.image(image_path, x=10, y=None, w=180)
-
-            pdf = PDF()
+        if self.screenshot_file:
+            pdf.image(self.screenshot_file, x=10, y=None, w=180)
             pdf.add_page()
-
-            for index, row in data.iterrows():
-                pdf.chapter_title(f"Profile: {row['username']}")
-                pdf.chapter_body(f"Name: {row['name']}\nBio: {row['bio']}\nPosts: {row['posts']}\nFollowers: {row['followers']}\nFollowing: {row['following']}\n")
-
-                # Add followers list
-                if self.followers:
-                    followers_list = "\n".join(self.followers)
-                    pdf.chapter_body(f"Followers List:\n{followers_list}\n")
-
-            pdf.add_image(self.screenshot_file)
-            pdf.add_page()
-            pdf.add_image(self.screenshot_file_followers)
-            pdf.output(self.output_file)
-            print(f"PDF saved as {self.output_file}")
-
-            return True
-        except Exception as e:
-            print(f"{e}")
-            return False
+        
+        if self.screenshot_file_followers:
+            pdf.image(self.screenshot_file_followers, x=10, y=None, w=180)
+        
+        pdf.output(self.output_file)
+        print(f"PDF saved as {self.output_file}")
+        return True
 
     def handle_not_now_popup(self):
         time.sleep(1)
