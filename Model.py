@@ -235,9 +235,11 @@ class ModelClass:
                 page_source = self.driver.page_source
                 urls = re.findall(r'(https?://[^\s"]+)', page_source)
 
-                for url in urls:
-                    if site in url:
-                        search_results.append(url)
+            for url in urls:
+                if site in url:
+                    if site == "twitter.com":
+                        username = "@" + username
+                    search_results.append(url)
 
            
             results_file = 'social_media_search_results.txt'
