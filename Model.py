@@ -85,7 +85,20 @@ class ModelClass:
         }
 
         # Capture screenshot as byte array
-        self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
+        name_element.click()
+
+        try:
+            # Wait until the button with the text 'Close' is present and clickable
+            close_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[text()='Close']"))
+            )
+            # Click the button
+            self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
+            time.sleep(5)
+            close_button.click()
+            print("Button clicked successfully.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
         # Click the followers link
         try:
