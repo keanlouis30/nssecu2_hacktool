@@ -96,7 +96,7 @@ class ControllerClass:
         elif command == "/scrape":
             if self.target_user_acquired:
                 self.view.display_message("Finding the information of this person")
-                if self.model.scrape_profile(self.target_username):
+                if self.model.scrape_profile(self.target_username, self.ig_logged_in):
                     self.view.display_message("Scraping Done")
                     self.scrape_done = True
                 else:
