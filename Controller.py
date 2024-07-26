@@ -41,7 +41,7 @@ class ControllerClass:
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
-            "[/scrapeSocialMedia]":"Scrape Twitter, YouTube, Facebook, and Google for social media profiles of the target username",
+            "[/profileMatch]":"Search Twitter, YouTube, Facebook, and Google for social media profiles of the target username",
             "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
             
             # Add other commands here
@@ -130,7 +130,7 @@ class ControllerClass:
                     self.view.display_message("The web logout is unsucessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
-        elif command == "/scrapeSocialMedia":
+        elif command == "/profileMatch":
             if self.target_user_acquired:
                 self.view.display_message(f"Scraping social media for: {self.target_username}")
                 
