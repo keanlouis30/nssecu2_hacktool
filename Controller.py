@@ -14,6 +14,7 @@
 
 
 #data handling and output processing
+import os
 import tkinter as tk
 
 class ControllerClass:
@@ -40,7 +41,7 @@ class ControllerClass:
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
-            "[/scrapeSocialMedia]":"Using the target username, it will match it to other social medias (Youtube and Twitter)",
+            "[/scrapeSocialMedia]":"Scrape Twitter, YouTube, Facebook, and Google for social media profiles of the target username",
             "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
             
             # Add other commands here
@@ -135,6 +136,7 @@ class ControllerClass:
                 
                 twitter_result = self.model.scrape_twitter(self.target_username)
                 youtube_result = self.model.scrape_youtube(self.target_username)
+                google_results = self.model.scrape_google(self.target_username)
                 
                 if twitter_result:
                     self.view.display_message("Twitter scraping completed successfully")
@@ -145,7 +147,16 @@ class ControllerClass:
                     self.view.display_message("YouTube scraping completed successfully")
                 else:
                     self.view.display_message("Error scraping YouTube")
+                
+                if google_results:
+                    self.view.display_message("Google search completed successfully")
+                    results_file = 'social_media_search_results.txt'
+                    if os.path.exists(results_file):
+                        self.view.display_message(f"Results saved to {results_file}")
+                    else:
+                        self.view.display_message("No results were saved")
+                else:
+                    self.view.display_message("Error searching Google")
             else:
                 self.view.display_message("Target username not provided")
-
-     
+            

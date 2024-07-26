@@ -20,6 +20,7 @@ import time
 import pandas as pd
 from fpdf import FPDF
 import os
+import re
 
 class ModelClass:
     def __init__(self, edgedriver_path):
@@ -194,6 +195,9 @@ class ModelClass:
         except Exception as e:
             print(f"Error scraping YouTube: {e}")
 
+
+
+
     def find_matches(self, target_username):
         matches = []
 
@@ -216,6 +220,36 @@ class ModelClass:
 
     def string_similarity(self, a, b):
         return SequenceMatcher(None, a, b).ratio()
+    
+    def scrape_google(self, username):
+        try:
+            social_media_sites = ["twitter.com", "youtube.com", "facebook.com"]
+            search_results = []
+
+            for site in social_media_sites:
+                search_query = f"{username} site:{site}"
+                self.driver.get(f'https://www.google.com/search?q={search_query}')
+                time.sleep(5)
+
+                
+                page_source = self.driver.page_source
+                urls = re.findall(r'(https?://[^\s"]+)', page_source)
+
+                for url in urls:
+                    if site in url:
+                        search_results.append(url)
+
+           
+            results_file = 'social_media_search_results.txt'
+            with open(results_file, 'w') as file:
+                for result in search_results:
+                    file.write(f"{result}\n")
+
+            return search_results
+
+        except Exception as e:
+            print(f"Error searching Google: {e}")
+            return None
 
 
     def close(self):
