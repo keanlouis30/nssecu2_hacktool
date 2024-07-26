@@ -9,6 +9,10 @@ To run this program, ensure you have the following Python libraries installed:
 - `tk`
 - `requests`
 
+### ProfileScraper.exe
+ProfileScaper.exe is the built file of the program
+Run it if IDEs are not available
+
 ### Installation
 
 To install the required libraries, run the following command:
