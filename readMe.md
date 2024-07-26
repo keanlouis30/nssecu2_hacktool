@@ -4,8 +4,7 @@ To run this program, ensure you have the following Python libraries installed:
 - `selenium`
 - `beautifulsoup4`
 - `pandas`
-- `FPDF`
-- `fdpf2`
+- ``reportlab`
 - `tk`
 - `requests`
 
@@ -18,14 +17,14 @@ Run it if IDEs are not available
 To install the required libraries, run the following command:
 
 ```sh
-pip install selenium beautifulsoup4 pandas FPDF tk requests fpdf2
+pip install selenium beautifulsoup4 pandas tk requests reportlab
 ```
 
 Verification
 To verify the installation of the libraries, use the following command:
 
 ```sh
-pip show selenium beautifulsoup4 pandas FPDF tk requests fpdf2
+pip show selenium beautifulsoup4 pandas tk requests reportlab
 ```
 
 GUI User Guide
@@ -58,8 +57,3 @@ Procedures
 
 ### Errors
 
-```sh
-UserWarning: You have both PyFPDF & fpdf2 installed. Both packages cannot be installed at the same time as they share the same module namespace. To only keep fpdf2, run: pip uninstall --yes pypdf && pip install --upgrade fpdf2
-```
-
-- uninstall and reinstall FPDFm, pip install --upgrade FPDF
