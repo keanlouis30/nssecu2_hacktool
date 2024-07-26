@@ -11,7 +11,7 @@
 # ASCAN, ADRIAN GIOVANNI
 # on 
 # (deadline)
-
+from difflib import SequenceMatcher
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -29,6 +29,7 @@ class ModelClass:
         self.screenshot_file = None
         self.output_file = None
         self.username = ""
+        self.profiles = []
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
@@ -162,31 +163,60 @@ class ModelClass:
             print("Clicked 'Not now' button.")
         except Exception as e:
             print(f"'Not now' button not found or already handled: {e}")
+##############################################################################################################################################
+    def scrape_twitter(self, username):
+        self.driver.get(f'https://twitter.com/{username}')
+        time.sleep(5)
 
-    def search_twitter(self, username):
         try:
-            #Just made it so that it will use target Username, so that it will check if profile exist. If profile exist then make txt url file for the profile
-            #Not really profile matching rn, more twitter searching. Will add functionality tomo for trying to search using IG things
-        
-            self.driver.get(f'https://twitter.com/{username}')
-            time.sleep(5)
-
-            
-            if "This account doesn’t exist" in self.driver.page_source:
-                print("Account does not exist.")
-                return False
-
-    
-            profile_url = f'https://twitter.com/{username}'
-            file_name = f'{username}_twitter_profile.txt'
-            with open(file_name, 'w') as file:
-                file.write(profile_url)
-            print(f"Profile URL saved in {file_name}")
-
+            name = self.driver.find_element(By.XPATH, '//div[@data-testid="UserName"]').text
+            self.add_profile_data({
+                'platform': 'Twitter',
+                'username': username,
+                'name': name
+            })
             return True
         except Exception as e:
-            print(f"Error searching Twitter: {e}")
-            return False
-        
+            print(f"Error scraping Twitter: {e}")
+
+    def scrape_youtube(self, username):
+        self.driver.get(f'https://www.youtube.com/{username}')
+        time.sleep(5)
+
+        try:
+            name = self.driver.find_element(By.XPATH, '//yt-formatted-string[@id="text"]').text
+            self.add_profile_data({
+                'platform': 'YouTube',
+                'username': username,
+                'name': name
+            })
+            return True
+        except Exception as e:
+            print(f"Error scraping YouTube: {e}")
+
+    def find_matches(self, target_username):
+        matches = []
+
+        for profile in self.profiles:
+            name_similarity = self.string_similarity(target_username, profile['name'])
+
+          
+            threshold = 0.5
+            if name_similarity > threshold:
+                matches.append({
+                    'platform': profile['platform'],
+                    'username': profile['username'],
+                    'name_similarity': name_similarity
+                })
+
+        return matches
+    
+    def add_profile_data(self, profile_data):
+        self.profiles.append(profile_data)
+
+    def string_similarity(self, a, b):
+        return SequenceMatcher(None, a, b).ratio()
+
+
     def close(self):
         self.driver.quit()

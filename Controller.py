@@ -40,7 +40,7 @@ class ControllerClass:
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
-            "[/searchTwitter]":"Using the target username, it will search for it on twitter.",
+            "[/scrapeSocialMedia]":"Using the target username, it will match it to other social medias (Youtube and Twitter)",
             "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
             
             # Add other commands here
@@ -129,15 +129,23 @@ class ControllerClass:
                     self.view.display_message("The web logout is unsucessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
-        elif command == "/searchTwitter":
+        elif command == "/scrapeSocialMedia":
             if self.target_user_acquired:
-             self.view.display_message(f"Searching Twitter for: {self.target_username}")
-             if self.model.search_twitter(self.target_username):
-               self.view.display_message("Twitter search completed successfully")
+                self.view.display_message(f"Scraping social media for: {self.target_username}")
+                
+                twitter_result = self.model.scrape_twitter(self.target_username)
+                youtube_result = self.model.scrape_youtube(self.target_username)
+                
+                if twitter_result:
+                    self.view.display_message("Twitter scraping completed successfully")
+                else:
+                    self.view.display_message("Error scraping Twitter")
+
+                if youtube_result:
+                    self.view.display_message("YouTube scraping completed successfully")
+                else:
+                    self.view.display_message("Error scraping YouTube")
             else:
-              self.view.display_message("Error searching Twitter")
-        else:
-            self.view.display_message("Target username not provided")
-        
+                self.view.display_message("Target username not provided")
 
      
