@@ -11,11 +11,6 @@
 # ASCAN, ADRIAN GIOVANNI
 # on 
 # (deadline)
-
-
-
-
-
 #Model
 
 
@@ -75,7 +70,7 @@ class ModelClass:
             print(f"Error during login: {e}")
             return False
 
-    def scrape_profile(self, username, ig_logged_in):
+    def scrape_profile(self, username):
         self.username = username
         self.driver.get(f'https://www.instagram.com/{username}/')
         time.sleep(5)
@@ -83,12 +78,13 @@ class ModelClass:
         name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj")]')
         name = name_element.text if name_element.text else None
         
-
+        time.sleep(3)
         try:
             bio = self.driver.find_element(By.XPATH, '//span[@class="_ap3a _aaco _aacu _aacx _aad7 _aade"]').text
         except Exception:
             bio = None
 
+        time.sleep(3)
         try:
             ul = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
             items = ul.find_elements(By.TAG_NAME, 'li')
@@ -103,7 +99,7 @@ class ModelClass:
         except Exception as e:
             print(f"Error in getting posts etc: {e}")
         print("leaving posts followers following count extraction")
-
+        time.sleep(3)
         
         name_element.click()
         print("clicked the name element")
