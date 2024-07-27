@@ -221,7 +221,7 @@ class ModelClass:
         if posts != 0:
             try:
                 print("scroll down page")
-                self.driver.execute_script("window.scrollTo(0,4000);")
+                self.driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
                 time.sleep(10) 
                 print("getting images")
                 images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img") 
@@ -305,7 +305,7 @@ class ModelClass:
                     print(f"Error adding screenshot to PDF: {e}")
             else:
                 print("Screenshot data is empty or not valid.")
-                
+
             if self.followers:
                 try:
                     elements.append(Paragraph("<b>Followers:</b>", styles['Heading2']))
