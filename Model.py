@@ -35,6 +35,9 @@ from PIL import Image as PILImage
 import io
 import tempfile
 import re
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
+
 
 
 class ModelClass:
@@ -255,8 +258,18 @@ class ModelClass:
         styles = getSampleStyleSheet()
         style_normal = styles["Normal"]
         style_heading = styles["Heading1"]
+        centered_style = ParagraphStyle(
+            name='Centered',
+            parent=styles['Normal'],
+            alignment=TA_CENTER
+        )
+        centered_h1_style = ParagraphStyle(
+            name='Centered',
+            parent=styles['Heading1'],
+            alignment=TA_CENTER
+        )
 
-        elements.append(Paragraph("Social Media Profile Report", style_heading))
+        elements.append(Paragraph("Social Media Profile Report", centered_h1_style))
         elements.append(Spacer(1, 0.2 * inch))
 
         if self.profile_data:
@@ -275,16 +288,24 @@ class ModelClass:
         try:
             if self.screenshot_data.getvalue():
                 try:
-                    print("Attempting to add screenshot to PDF")
-                    img_reader = ImageReader(io.BytesIO(self.screenshot_data.getvalue()))
+                    # Convert screenshot data to an Image object using PIL
+                    img_data = PILImage.open(io.BytesIO(self.screenshot_data.getvalue()))
+                    
+                    # Resize the image to 6x6 inches (600x600 pixels if 100 DPI)
+                    img_data = img_data.resize((600, 600))
+
+                    # Convert PIL image to ImageReader object
+                    img_reader = ImageReader(img_data)
+                    
+                    # Add screenshot to PDF
                     img = Image(img_reader, width=6*inch, height=6*inch)
                     elements.append(img)
+                    elements.append(Spacer(1, 12))
                     print("Screenshot added to PDF elements")
                 except Exception as e:
                     print(f"Error adding screenshot to PDF: {e}")
-                else:
-                    print("Screenshot data is empty or not valid.")
-                    
+            else:
+                print("Screenshot data is empty or not valid.")
             if self.followers:
                 try:
                     elements.append(Paragraph("<b>Followers:</b>", styles['Heading2']))
@@ -307,7 +328,7 @@ class ModelClass:
 
             if self.image_data:
                 try:
-                    elements.append(Paragraph("<b>Images and Captions:</b>", styles['Heading2']))
+                    elements.append(Paragraph("<b>Images and Captions:</b>", centered_h1_style))
                     elements.append(Spacer(1, 0.2 * inch))
                     for data in self.image_data:
                         img_data = data['image']
@@ -325,7 +346,7 @@ class ModelClass:
                             temp_file_paths.append(temp_file_path)
                         elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
                         elements.append(Spacer(1, 12))
-                        elements.append(Paragraph(f"<b>Caption:</b> {caption}", style_normal))
+                        elements.append(Paragraph(f"<b>Caption:</b> {caption}", centered_style))
                         elements.append(Spacer(1, 12))
                 except Exception as e:
                     print(f"Error saving posts + caption: {e}")
