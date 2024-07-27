@@ -34,10 +34,12 @@ import requests
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from difflib import SequenceMatcher
-import re
+from reportlab.lib.utils import ImageReader
+import io
 from PIL import Image as PILImage
 import io
 import tempfile
+import re
 
 
 class ModelClass:
@@ -266,14 +268,13 @@ class ModelClass:
         try:
             if self.screenshot_data:
                 try:
-                    print("attempting to save date joined ss")
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
-                        temp_file.write(self.screenshot_data.getvalue())
-                        temp_file_path = temp_file.name
-                        temp_file_paths.append(temp_file_path)
-                    elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
+                    print("Attempting to add screenshot to PDF")
+                    img_reader = ImageReader(io.BytesIO(self.screenshot_data.getvalue()))
+                    img = Image(img_reader, width=6*inch, height=6*inch)
+                    elements.append(img)
+                    print("Screenshot added to PDF elements")
                 except Exception as e:
-                    print(f"Error saving profile ss: {e}")
+                    print(f"Error adding screenshot to PDF: {e}")
 
             if self.followers:
                 try:
