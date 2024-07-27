@@ -48,7 +48,7 @@ class ModelClass:
         self.driver = webdriver.Edge(service=service)
         self.profile_data = {}
         self.image_data = []  
-        self.screenshot_data = ""
+        self.screenshot_data 
         self.username = ""
         self.followers = []
         self.followings = []
@@ -129,6 +129,7 @@ class ModelClass:
                 EC.element_to_be_clickable((By.XPATH, "//button[text()='Close']"))
             )
             self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
+            print("test if the screenshot was taken")
             date_joined_element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']"))
             )
