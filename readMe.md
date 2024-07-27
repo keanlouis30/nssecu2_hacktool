@@ -4,7 +4,7 @@ To run this program, ensure you have the following Python libraries installed:
 - `selenium`
 - `beautifulsoup4`
 - `pandas`
-- ``reportlab`
+- `reportlab`
 - `tk`
 - `requests`
 
