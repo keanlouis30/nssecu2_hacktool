@@ -80,11 +80,10 @@ class ModelClass:
         self.driver.get(f'https://www.instagram.com/{username}/')
         time.sleep(5)
 
-        try:
-            name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj")]')
-            name = name_element.text
-        except Exception:
-            name = None
+        name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj")]')
+        name = name_element.text if name_element.text else None
+        
+
         try:
             bio = self.driver.find_element(By.XPATH, '//span[@class="_ap3a _aaco _aacu _aacx _aad7 _aade"]').text
         except Exception:
@@ -103,6 +102,7 @@ class ModelClass:
                     following = int(text.split()[0].replace(',', ''))
         except Exception as e:
             print(f"Error in getting posts etc: {e}")
+        print("leaving posts followers following count extraction")
 
         
         name_element.click()
@@ -112,7 +112,7 @@ class ModelClass:
             date_joined = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']/following-sibling::span[1]"))
                 ).text
-            print("successfully found daite joined")
+            print("successfully found date joined")
         except:
             date_joined = None
 
