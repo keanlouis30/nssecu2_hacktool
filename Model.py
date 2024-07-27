@@ -48,7 +48,7 @@ class ModelClass:
         self.driver = webdriver.Edge(service=service)
         self.profile_data = {}
         self.image_data = []  
-        self.screenshot_data = None
+        self.screenshot_data = ""
         self.username = ""
         self.followers = []
         self.followings = []
