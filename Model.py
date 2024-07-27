@@ -380,7 +380,7 @@ class ModelClass:
                         elements.append(Spacer(1, 12))
                         elements.append(Paragraph(f"<b>Date and Time:</b> {date_time}", centered_style))
                         elements.append(Spacer(1, 12))
-                        elements.append(Paragraph(f"<b>Title:</b> {title}", centered_style))
+                        elements.append(Paragraph(f"<b>Complete Date:</b> {title}", centered_style))
                         elements.append(Spacer(1, 12))
                 except Exception as e:
                     print(f"Error saving posts + caption: {e}")
