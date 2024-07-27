@@ -76,7 +76,7 @@ class ViewClass:
     def send_message(self, input_text):
         if input_text.startswith("/loginPass"):
             self.chatArea.config(state=tk.NORMAL)
-            self.chatArea.insert(tk.END, f"You: \n[redacted] \n\n")
+            self.chatArea.insert(tk.END, f"You: \nPassword: [redacted] \n\n")
             self.chatArea.see(tk.END)
             self.chatArea.config(state=tk.DISABLED)
             self.userInput.delete(0, tk.END)
