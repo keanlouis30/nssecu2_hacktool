@@ -265,11 +265,15 @@ class ModelClass:
 
         try:
             if self.screenshot_data:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
-                    temp_file.write(self.screenshot_data.getvalue())
-                    temp_file_path = temp_file.name
-                    temp_file_paths.append(temp_file_path)
-                elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
+                try:
+                    print("attempting to save date joined ss")
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                        temp_file.write(self.screenshot_data.getvalue())
+                        temp_file_path = temp_file.name
+                        temp_file_paths.append(temp_file_path)
+                    elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
+                except Exception as e:
+                    print(f"Error saving profile ss: {e}")
 
             if self.followers:
                 try:
