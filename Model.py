@@ -37,6 +37,7 @@ import tempfile
 import re
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 
@@ -135,7 +136,7 @@ class ModelClass:
             print("Button clicked successfully.")
         except Exception as e:
             print(f"An error occurred: {e}")
-
+        time.sleep(3)
         try:
             followers_link = WebDriverWait(self.driver, 500).until(
                 EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/followers/"]'))
@@ -147,7 +148,7 @@ class ModelClass:
         except Exception as e:
             print(f"Error clicking followers link: {e}")
             return
-        
+        time.sleep(3)
         try:
             followers_list = WebDriverWait(self.driver, 500).until(
                 EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "xyi19xy x1ccrb07 xtf3nb5 x1pc53ja x1lliihq x1iyjqo2 xs83m0k xz65tgg x1rife3k x1n2onr6")]'))
@@ -219,12 +220,14 @@ class ModelClass:
             print(f"Error clicking close button: {e}")
 
         if posts != 0:
+            posts = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
             try:
-                print("scroll down page")
+                print("Scrolling down the page")
                 self.driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
-                time.sleep(10) 
-                print("getting images")
-                images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img") 
+                time.sleep(10)
+                
+                print("Getting images")
+                images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
                 for image in images:
                     url = image.get_attribute('src')
                     alt = image.get_attribute('alt')
@@ -232,8 +235,33 @@ class ModelClass:
                         try:
                             response = requests.get(url)
                             img = PILImage.open(io.BytesIO(response.content))
-                            print("storing image + caption")
-                            self.image_data.append({'image': img, 'caption': alt})
+                            
+                            print("Clicking image to get time data")
+                            action = ActionChains(self.driver)
+                            action.move_to_element(image).click().perform()
+                            time.sleep(2)
+                            
+                            try:
+                                time_element = self.driver.find_element(By.CSS_SELECTOR, "time.x1p4m5qa")
+                                datetime = time_element.get_attribute('datetime')
+                                title = time_element.get_attribute('title')
+                            except Exception as e:
+                                print(f"Error extracting time data: {e}")
+                                datetime = None
+                                title = None
+                            
+                            print("Closing image")
+                            close_button = self.driver.find_element(By.CSS_SELECTOR, "div[role='button'][tabindex='0'] svg[aria-label='Close']")
+                            close_button.click()
+                            time.sleep(1)
+                            
+                            print("Storing image, caption, and time data")
+                            self.image_data.append({
+                                'image': img,
+                                'caption': alt,
+                                'dateTime': datetime, 
+                                'title': title
+                            })
                         except Exception as e:
                             print(f"Error processing image: {e}")
             except Exception as e:
@@ -333,6 +361,8 @@ class ModelClass:
                     for data in self.image_data:
                         img_data = data['image']
                         caption = data['caption']
+                        date_time = data['dateTime']
+                        title = data['title']
 
                         if isinstance(img_data, PILImage.Image):
                             img_bytes = io.BytesIO()
@@ -347,6 +377,10 @@ class ModelClass:
                         elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
                         elements.append(Spacer(1, 12))
                         elements.append(Paragraph(f"<b>Caption:</b> {caption}", centered_style))
+                        elements.append(Spacer(1, 12))
+                        elements.append(Paragraph(f"<b>Date and Time: <b> {date_time}", centered_style))
+                        elements.append(Spacer(1, 12))
+                        elements.append(Paragraph(f"<b>Title: <b> {title}", centered_style))
                         elements.append(Spacer(1, 12))
                 except Exception as e:
                     print(f"Error saving posts + caption: {e}")
