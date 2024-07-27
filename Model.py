@@ -217,7 +217,7 @@ class ModelClass:
         if posts != 0:
             try:
                 print("scroll down page")
-                self.driver.execute_script("window.scrollTo(0,4000);")
+                self.driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);")
                 time.sleep(10) 
                 print("getting images")
                 images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img") 
