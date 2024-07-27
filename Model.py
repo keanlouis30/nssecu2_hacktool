@@ -75,7 +75,8 @@ class ModelClass:
         self.driver.get(f'https://www.instagram.com/{username}/')
         time.sleep(5)
 
-        name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x193iq5w x6ikm8r x10wlt62 xlyipyv xuxw1ft")]')
+        username_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x193iq5w x6ikm8r x10wlt62 xlyipyv xuxw1ft")]')
+        name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj")]')
         name = name_element.text if name_element.text else None
         
         time.sleep(3)
@@ -101,7 +102,7 @@ class ModelClass:
         print("leaving posts followers following count extraction")
         time.sleep(3)
         
-        name_element.click()
+        username_element.click()
         print("clicked the name element")
         try:
             date_joined_element = WebDriverWait(self.driver, 500).until(EC.presence_of_element_located((By.XPATH,"//span[text()='Date joined']" )))
