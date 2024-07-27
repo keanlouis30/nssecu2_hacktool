@@ -1,3 +1,20 @@
+# This project was made in partial fulfillment of the requirements for the course NSSECU2
+# submitted by:
+# ABANIEL, AARON C.
+# BIACORA, LUIS GABRIEL S.
+# BLASCO, GIAN RAPHAEL Q.
+# EVANGELISTA, REGINALD ANDRE I.
+# QUINONES, ANGELO Y.
+# ROSALES, KEAN LOUIS R.
+# Group 4 | S12
+# Submitted to:
+# ASCAN, ADRIAN GIOVANNI
+# on 
+# (deadline)
+
+
+#Model
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -16,16 +33,18 @@ from PIL import Image as PILImage
 import io
 import tempfile
 
+
 class ModelClass:
     def __init__(self, edgedriver_path):
         service = Service(edgedriver_path)
         self.driver = webdriver.Edge(service=service)
         self.profile_data = {}
-        self.image_data = []  # List to store images as byte arrays
-        self.screenshot_data = None  # Byte array for screenshot
+        self.image_data = []  
+        self.screenshot_data = None  
         self.username = ""
         self.followers = []
         self.followings = []
+        self.date_joined = ""
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
@@ -52,8 +71,8 @@ class ModelClass:
         time.sleep(5)
 
         try:
-            name_element = self.driver.find_element(By.TAG_NAME, 'h2')
-            name = name_element.text if name_element else None
+            name_element = self.driver.find_element(By.XPATH, '//span[contains(@class, "x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye xvs91rp x1s688f x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj")]')
+            name = name_element.text
         except Exception:
             name = None
         try:
@@ -75,6 +94,16 @@ class ModelClass:
         except Exception as e:
             print(f"Error in getting posts etc: {e}")
 
+        name_element.click()
+
+        try:
+            date_joined_element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH,"//span[text()='Date joined']" )))
+            date_joined = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']/following-sibling::span[1]"))
+                ).text
+        except:
+            date_joined = None
+
         self.profile_data = {
             'username': username,
             'name': name,
@@ -82,25 +111,22 @@ class ModelClass:
             'posts': posts,
             'followers': followers,
             'following': following,
+            'date_joined': date_joined
         }
 
-        # Capture screenshot as byte array
-        name_element.click()
-
         try:
-            # Wait until the button with the text 'Close' is present and clickable
             close_button = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[text()='Close']"))
             )
-            # Click the button
             self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
-            time.sleep(5)
+            date_joined_element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']"))
+            )
             close_button.click()
             print("Button clicked successfully.")
         except Exception as e:
             print(f"An error occurred: {e}")
 
-        # Click the followers link
         try:
             followers_link = WebDriverWait(self.driver, 500).until(
                 EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/followers/"]'))
@@ -142,7 +168,6 @@ class ModelClass:
         except Exception as e:
             print(f"Error clicking close button: {e}")
 
-        # Click the following link
         try:
             following_link = WebDriverWait(self.driver, 500).until(
                 EC.presence_of_element_located((By.XPATH, f'//a[@href="/{username}/following/"]'))
@@ -186,23 +211,25 @@ class ModelClass:
 
         if posts != 0:
             try:
+                print("scroll down page")
                 self.driver.execute_script("window.scrollTo(0,4000);")
                 time.sleep(10) 
+                print("getting images")
                 images = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img") 
-                image_urls = [image.get_attribute('src') for image in images]
-
-                for url in image_urls:
+                for image in images:
+                    url = image.get_attribute('src')
+                    alt = image.get_attribute('alt')
                     if url:
                         try:
-                            img_data = requests.get(url).content
-                            self.image_data.append(img_data)  # Store image as byte array
-                            print(f"Image added to array.")
+                            response = requests.get(url)
+                            img = PILImage.open(io.BytesIO(response.content))
+                            print("storing image + caption")
+                            self.image_data.append({'image': img, 'caption': alt})
                         except Exception as e:
-                            print(f"Error adding image: {e}")
+                            print(f"Error processing image: {e}")
             except Exception as e:
-                print(f"Error scraping profile: {e}")
-                return False
-
+                print(f"Error extracting images: {e}")
+        print("scrape done")
         return True
 
     def save_to_pdf(self):
@@ -219,26 +246,12 @@ class ModelClass:
             elements.append(Paragraph(f"Profile: {self.profile_data.get('username')}", style_heading))
             elements.append(Spacer(1, 0.2 * inch))
 
-            elements.append(Paragraph(f"Name: {self.profile_data.get('name')}", style_normal))
-            elements.append(Paragraph(f"Bio: {self.profile_data.get('bio')}", style_normal))
-            elements.append(Paragraph(f"Posts: {self.profile_data.get('posts')}", style_normal))
-            elements.append(Paragraph(f"Followers: {self.profile_data.get('followers')}", style_normal))
-            elements.append(Paragraph(f"Following: {self.profile_data.get('following')}", style_normal))
-            elements.append(Spacer(1, 0.2 * inch))
-
-            if self.followers:
-                elements.append(Paragraph("Followers List:", style_heading))
-                elements.append(Spacer(1, 0.2 * inch))
-                followers_list = "<br/>".join(self.followers)
-                elements.append(Paragraph(followers_list, style_normal))
-                elements.append(Spacer(1, 0.2 * inch))
-
-            if self.followings:
-                elements.append(Paragraph("Following List:", style_heading))
-                elements.append(Spacer(1, 0.2 * inch))
-                followings_list = "<br/>".join(self.followings)
-                elements.append(Paragraph(followings_list, style_normal))
-                elements.append(Spacer(1, 0.2 * inch))
+            try:
+                for key, value in self.profile_data.items():
+                    elements.append(Paragraph(f"<b>{key.capitalize()}:</b> {value}", style_normal))
+                    elements.append(Spacer(1, 12))
+            except Exception as e:
+                print(f"Error saving profile data: {e}")
 
         temp_file_paths = []
 
@@ -248,16 +261,52 @@ class ModelClass:
                     temp_file.write(self.screenshot_data.getvalue())
                     temp_file_path = temp_file.name
                     temp_file_paths.append(temp_file_path)
-                elements.append(Image(temp_file_path, width=6*inch, height=4*inch))
+                elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
 
-            for img_data in self.image_data:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
-                    img = PILImage.open(io.BytesIO(img_data))
-                    img = img.convert('RGB')
-                    img.save(temp_file, format='JPEG')
-                    temp_file_path = temp_file.name
-                    temp_file_paths.append(temp_file_path)
-                elements.append(Image(temp_file_path, width=3*inch, height=3*inch))
+            if self.followers:
+                try:
+                    elements.append(Paragraph("<b>Followers:</b>", styles['Heading2']))
+                    elements.append(Spacer(1, 0.2 * inch))
+                    followers_list = "<br/>".join(self.followers)
+                    elements.append(Paragraph(followers_list, style_normal))
+                    elements.append(Spacer(1, 12))
+                except Exception as e:
+                    print(f"Error saving followers list: {e}")
+
+            if self.followings:
+                try:
+                    elements.append(Paragraph("<b>Following:</b>", styles['Heading2']))
+                    elements.append(Spacer(1, 0.2 * inch))
+                    followings_list = "<br/>".join(self.followings)
+                    elements.append(Paragraph(followings_list, style_normal))
+                    elements.append(Spacer(1, 12))
+                except Exception as e:
+                    print(f"Error saving following list: {e}")
+
+            if self.image_data:
+                try:
+                    elements.append(Paragraph("<b>Images and Captions:</b>", styles['Heading2']))
+                    elements.append(Spacer(1, 0.2 * inch))
+                    for data in self.image_data:
+                        img_data = data['image']
+                        caption = data['caption']
+
+                        if isinstance(img_data, PILImage.Image):
+                            img_bytes = io.BytesIO()
+                            img_data.save(img_bytes, format='JPEG')
+                            img_data = img_bytes.getvalue()
+
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+                            img = PILImage.open(io.BytesIO(img_data))
+                            img.save(temp_file, format='JPEG')
+                            temp_file_path = temp_file.name
+                            temp_file_paths.append(temp_file_path)
+                        elements.append(Image(temp_file_path, width=6*inch, height=6*inch))
+                        elements.append(Spacer(1, 12))
+                        elements.append(Paragraph(f"<b>Caption:</b> {caption}", style_normal))
+                        elements.append(Spacer(1, 12))
+                except Exception as e:
+                    print(f"Error saving posts + caption: {e}")
 
             doc.build(elements)
         finally:
@@ -268,6 +317,7 @@ class ModelClass:
         print(f"PDF saved as {self.profile_data.get('username')}_report.pdf")
         return True
 
+    
     def handle_not_now_popup(self):
         time.sleep(1)
 
@@ -299,4 +349,4 @@ class ModelClass:
             return True
         except Exception as e:
             print(f"Error logging out: {e}")
-            return False
+        return False
