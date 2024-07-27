@@ -15,6 +15,7 @@
 
 #data handling and output processing
 import tkinter as tk
+import os
 
 class ControllerClass:
     def __init__(self, model, view):
@@ -41,6 +42,7 @@ class ControllerClass:
             "[/targetUsername (username)]": "Provide the target's Instagram username",
             "[/scrape]": "Get the information of the target",
             "[/generateReport]": "Generate a PDF of the report",
+            "[/profileMatch]":"Search Twitter, YouTube, Facebook, and Google for social media profiles of the target username",
             "[/igLogout]": "Log out of Instagram and remove your Username and Password from this session"
             # Add other commands here
         }
@@ -128,5 +130,35 @@ class ControllerClass:
                     self.view.display_message("The web logout is unsucessful, please try again")
             else:
                 self.view.display_message("Error! User is not yet logged in")
+        elif command == "/profileMatch": #########New Command
+            if self.target_user_acquired:
+                self.view.display_message(f"Scraping social media for: {self.target_username}")
+                
+                twitter_result = self.model.scrape_twitter(self.target_username)
+                youtube_result = self.model.scrape_youtube(self.target_username)
+                google_results = self.model.scrape_google(self.target_username)
+                
+                if twitter_result:
+                    self.view.display_message("Twitter scraping completed successfully")
+                else:
+                    self.view.display_message("No exact profile on Twitter")
+
+                if youtube_result:
+                    self.view.display_message("YouTube scraping completed successfully")
+                else:
+                    self.view.display_message("No exact profile on Youtube")
+                
+                if google_results:
+                    self.view.display_message("Google search completed successfully")
+                    results_file = 'social_media_search_results.txt'
+                    if os.path.exists(results_file):
+                        self.view.display_message(f"Results saved to {results_file}")
+                    else:
+                        self.view.display_message("No results were saved")
+                else:
+                    self.view.display_message("Error searching Google")
+            else:
+                self.view.display_message("Target username not provided") 
         else:
             self.view.display_message("Unknown command. Type /help for a list of commands.")
+           

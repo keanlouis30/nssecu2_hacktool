@@ -13,7 +13,11 @@
 # (deadline)
 
 
+
+
+
 #Model
+
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -29,6 +33,8 @@ import os
 import requests
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from difflib import SequenceMatcher
+import re
 from PIL import Image as PILImage
 import io
 import tempfile
@@ -44,7 +50,9 @@ class ModelClass:
         self.username = ""
         self.followers = []
         self.followings = []
+        self.profiles = []
         self.date_joined = ""
+
 
     def login_instagram(self, username, password):
         self.driver.get('https://www.instagram.com/accounts/login/')
@@ -349,4 +357,97 @@ class ModelClass:
             return True
         except Exception as e:
             print(f"Error logging out: {e}")
+
+            return False
+  
+    def scrape_twitter(self, username):
+        self.driver.get(f'https://twitter.com/{username}')
+        time.sleep(5)
+
+        try:
+            name = self.driver.find_element(By.XPATH, '//div[@data-testid="UserName"]').text
+            self.add_profile_data({
+                'platform': 'Twitter',
+                'username': username,
+                'name': name
+            })
+            return True
+        except Exception as e:
+            print(f"Error scraping Twitter: {e}")
+
+    def scrape_youtube(self, username):
+        self.driver.get(f'https://www.youtube.com/{username}')
+        time.sleep(5)
+
+        try:
+            name = self.driver.find_element(By.XPATH, '//yt-formatted-string[@id="text"]').text
+            self.add_profile_data({
+                'platform': 'YouTube',
+                'username': username,
+                'name': name
+            })
+            return True
+        except Exception as e:
+            print(f"Error scraping YouTube: {e}")
+
+
+
+
+    def find_matches(self, target_username):
+        matches = []
+
+        for profile in self.profiles:
+            name_similarity = self.string_similarity(target_username, profile['name'])
+
+          
+            threshold = 0.5
+            if name_similarity > threshold:
+                matches.append({
+                    'platform': profile['platform'],
+                    'username': profile['username'],
+                    'name_similarity': name_similarity
+                })
+
+        return matches
+    
+    def add_profile_data(self, profile_data):
+        self.profiles.append(profile_data)
+
+    def string_similarity(self, a, b):
+        return SequenceMatcher(None, a, b).ratio()
+    
+    def scrape_google(self, username):
+        try:
+            social_media_sites = ["twitter.com", "youtube.com", "facebook.com"]
+            search_results = []
+
+            for site in social_media_sites:
+                search_query = f"{username} site:{site}"
+                self.driver.get(f'https://www.google.com/search?q={search_query}')
+                time.sleep(5)
+
+                
+                page_source = self.driver.page_source
+                urls = re.findall(r'(https?://[^\s"]+)', page_source)
+
+            for url in urls:
+                if site in url:
+                    if site != "facebook.com" :
+                        username = "@" + username
+                    search_results.append(url)
+
+           
+            results_file = 'social_media_search_results.txt'
+            with open(results_file, 'w') as file:
+                for result in search_results:
+                    file.write(f"{result}\n")
+
+            return search_results
+
+        except Exception as e:
+            print(f"Error searching Google: {e}")
+            return None
+        
+
         return False
+
