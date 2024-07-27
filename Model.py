@@ -48,7 +48,7 @@ class ModelClass:
         self.driver = webdriver.Edge(service=service)
         self.profile_data = {}
         self.image_data = []  
-        self.screenshot_data = None  
+        self.screenshot_data = None
         self.username = ""
         self.followers = []
         self.followings = []
@@ -266,7 +266,7 @@ class ModelClass:
         temp_file_paths = []
 
         try:
-            if self.screenshot_data:
+            if self.screenshot_data != None:
                 try:
                     print("Attempting to add screenshot to PDF")
                     img_reader = ImageReader(io.BytesIO(self.screenshot_data.getvalue()))
