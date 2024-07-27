@@ -288,17 +288,16 @@ class ModelClass:
         try:
             if self.screenshot_data.getvalue():
                 try:
-                    # Convert screenshot data to an Image object using PIL
-                    img_data = PILImage.open(io.BytesIO(self.screenshot_data.getvalue()))
-                    
-                    # Resize the image to 6x6 inches (600x600 pixels if 100 DPI)
-                    img_data = img_data.resize((600, 600))
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                        temp_file.write(self.screenshot_data.getvalue())
+                        temp_file_path = temp_file.name
+                        temp_file_paths.append(temp_file_path)
 
-                    # Convert PIL image to ImageReader object
-                    img_reader = ImageReader(img_data)
-                    
+                    # Verify temporary file creation
+                    print(f"Temporary file created at: {temp_file_path}")
+
                     # Add screenshot to PDF
-                    img = Image(img_reader, width=6*inch, height=6*inch)
+                    img = Image(temp_file_path, width=6*inch, height=6*inch)
                     elements.append(img)
                     elements.append(Spacer(1, 12))
                     print("Screenshot added to PDF elements")
@@ -306,6 +305,7 @@ class ModelClass:
                     print(f"Error adding screenshot to PDF: {e}")
             else:
                 print("Screenshot data is empty or not valid.")
+                
             if self.followers:
                 try:
                     elements.append(Paragraph("<b>Followers:</b>", styles['Heading2']))
