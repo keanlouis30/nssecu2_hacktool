@@ -114,25 +114,19 @@ class ModelClass:
         except:
             date_joined = None
 
-        self.profile_data = {
-            'username': username,
-            'name': name,
-            'bio': bio,
-            'posts': posts,
-            'followers': followers,
-            'following': following,
-            'date_joined': date_joined
-        }
-
+        
         try:
+            time.sleep(2)
             close_button = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[text()='Close']"))
             )
             self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
             print("test if the screenshot was taken")
+            time.sleep(3)
             date_joined_element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']"))
             )
+            time.sleep(3)
             close_button.click()
             print("Button clicked successfully.")
         except Exception as e:
@@ -240,6 +234,17 @@ class ModelClass:
                             print(f"Error processing image: {e}")
             except Exception as e:
                 print(f"Error extracting images: {e}")
+        
+        self.profile_data = {
+            'username': username,
+            'name': name,
+            'bio': bio,
+            'posts': posts,
+            'followers': followers,
+            'following': following,
+            'date_joined': date_joined
+        }
+
         print("scrape done")
         return True
 
