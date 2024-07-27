@@ -267,15 +267,20 @@ class ModelClass:
         temp_file_paths = []
 
         try:
-            try:
-                print("Attempting to add screenshot to PDF")
-                img_reader = ImageReader(io.BytesIO(self.screenshot_data.getvalue()))
-                img = Image(img_reader, width=6*inch, height=6*inch)
-                elements.append(img)
-                print("Screenshot added to PDF elements")
-            except Exception as e:
-                print(f"Error adding screenshot to PDF: {e}")
+            if self.screenshot_data.getvalue():
+                try:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                        temp_file.write(self.screenshot_data.getvalue())
+                        temp_file_path = temp_file.name
+                        temp_file_paths.append(temp_file_path)
 
+                    # Add screenshot to PDF
+                    img = Image(temp_file_path, width=6*inch, height=6*inch)
+                    elements.append(img)
+                    elements.append(Spacer(1, 12))
+                    print("Screenshot added to PDF elements")
+                except Exception as e:
+                    print(f"Error adding screenshot to PDF: {e}")
             if self.followers:
                 try:
                     elements.append(Paragraph("<b>Followers:</b>", styles['Heading2']))
