@@ -104,24 +104,28 @@ class ModelClass:
         except Exception as e:
             print(f"Error in getting posts etc: {e}")
 
+        
         name_element.click()
-
+        print("clicked the name element")
         try:
             date_joined_element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH,"//span[text()='Date joined']" )))
             date_joined = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']/following-sibling::span[1]"))
                 ).text
+            print("successfully found daite joined")
         except:
             date_joined = None
 
-        
+        print("entering screenshot block")
         try:
+            print("entered block")
             time.sleep(2)
             close_button = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[text()='Close']"))
             )
+            print("ettempting to take screenshot")
             self.screenshot_data = io.BytesIO(self.driver.get_screenshot_as_png())
-            print("test if the screenshot was taken")
+            print("screenshot taken")
             time.sleep(3)
             date_joined_element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//span[text()='Date joined']"))
