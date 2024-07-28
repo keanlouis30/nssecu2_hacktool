@@ -224,6 +224,7 @@ class ModelClass:
             print(f"Error clicking close button: {e}")
 
         if posts != 0:
+            self.image_data = []
             try:
                 print("Scrolling down the page")
                 self.driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
