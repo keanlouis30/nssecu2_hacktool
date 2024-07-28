@@ -96,10 +96,10 @@ class ModelClass:
             items = ul.find_elements(By.TAG_NAME, 'li')
             for li in items:
                 text = li.text
-                if 'post' in text:
-                    posts = 1
-                elif 'posts' in text:
+                if 'posts' in text:
                     posts = int(text.split()[0].replace(',', ''))
+                elif 'post' in text:
+                    posts = 1
                 elif 'followers' in text:
                     followers = int(text.split()[0].replace(',', ''))
                 elif 'following' in text:
