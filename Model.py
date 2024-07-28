@@ -219,8 +219,8 @@ class ModelClass:
         except Exception as e:
             print(f"Error clicking close button: {e}")
 
-        if posts != 0:
-            posts = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
+        number_of_posts = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
+        if number_of_posts != 0:
             try:
                 print("Scrolling down the page")
                 self.driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
