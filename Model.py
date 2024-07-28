@@ -89,18 +89,22 @@ class ModelClass:
         except Exception:
             bio = None
 
+        posts, followers, following = 0, 0, 0
         time.sleep(3)
         try:
             ul = WebDriverWait(self.driver, 500).until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
             items = ul.find_elements(By.TAG_NAME, 'li')
             for li in items:
                 text = li.text
-                if 'posts' in text:
+                if 'post' in text:
+                    posts = 1
+                elif 'posts' in text:
                     posts = int(text.split()[0].replace(',', ''))
                 elif 'followers' in text:
                     followers = int(text.split()[0].replace(',', ''))
                 elif 'following' in text:
                     following = int(text.split()[0].replace(',', ''))
+                print(f"posts: {posts}, followers: {followers}, following: {following}")
         except Exception as e:
             print(f"Error in getting posts etc: {e}")
         print("leaving posts followers following count extraction")
@@ -219,8 +223,8 @@ class ModelClass:
         except Exception as e:
             print(f"Error clicking close button: {e}")
 
-        number_of_posts = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
-        if number_of_posts != 0:
+        if posts != 0:
+            posts = self.driver.find_elements(By.CSS_SELECTOR, "div._aagv img")
             try:
                 print("Scrolling down the page")
                 self.driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
