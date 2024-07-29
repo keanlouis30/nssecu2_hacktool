@@ -464,8 +464,6 @@ class ModelClass:
             print(f"Error scraping YouTube: {e}")
 
 
-
-
     def find_matches(self, target_username):
         matches = []
 
