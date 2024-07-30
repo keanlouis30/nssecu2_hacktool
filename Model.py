@@ -493,11 +493,15 @@ class ModelClass:
             search_results = []
 
             for site in social_media_sites:
-                search_query = f"{username} site:{site}"
+                if site == "facebook.com":
+                    search_query = f"{self.profile_data.get('name')} site:{site}"
+                else:
+                    search_query = f"{username} site:{site}"
+                    
                 self.driver.get(f'https://www.google.com/search?q={search_query}')
                 time.sleep(5)
 
-                
+                    
                 page_source = self.driver.page_source
                 urls = re.findall(r'(https?://[^\s"]+)', page_source)
 
